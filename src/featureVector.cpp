@@ -122,7 +122,7 @@ FeatureMatrix* createFeatureMatrix(int nFeaturesVectors){
     FeatureMatrix* featureMatrix = NULL;
     featureMatrix = (FeatureMatrix*)calloc(1,sizeof(FeatureMatrix));
     featureMatrix->nFeaturesVectors = nFeaturesVectors;
-    featureMatrix->featureVector = (FeatureVector**)calloc((size_t)nFeaturesVectors,sizeof(FeatureVector*));
+    featureMatrix->featureVector = (FeatureVector**) calloc((size_t)nFeaturesVectors, sizeof(FeatureVector*));
     return featureMatrix;
 }
 
@@ -130,9 +130,9 @@ FeatureMatrix* createFeatureMatrix(int nFeaturesVectors,int vectorSize){
     FeatureMatrix* featureMatrix = NULL;
     featureMatrix = (FeatureMatrix*)calloc(1,sizeof(FeatureMatrix));
     featureMatrix->nFeaturesVectors = nFeaturesVectors;
-    featureMatrix->featureVector = (FeatureVector**)calloc((size_t)nFeaturesVectors,sizeof(FeatureVector*));
+    featureMatrix->featureVector = (FeatureVector**) calloc((size_t)nFeaturesVectors, sizeof(FeatureVector*));
     for (int i = 0; i < vectorSize; ++i) {
-        featureMatrix->featureVector[0] = createFeatureVector(vectorSize);
+        featureMatrix->featureVector[i] = createFeatureVector(vectorSize);
     }
     return featureMatrix;
 }
@@ -194,6 +194,37 @@ void printFeatureMatrix(FeatureMatrix* featureMatrix){
     printf("\n");
 }
 
+float eucledianDistance(FeatureVector *v1, FeatureVector *v2) {
+    if (v1->size != v2->size) {
+        printf("FeatureVectors size mismatch.\n");
+        return -1;
+    }
+
+    int size = v1->size;
+    int i;
+    float sum=0.0;
+    for (i=0; i < size; i++)
+        sum += (v1->features[i] - v2->features[i]) * (v1->features[i] - v2->features[i]);
+
+    return sqrt(sum);
+}
+
+int findNearestCluster(FeatureVector *testObject, FeatureMatrix *clusters) {
+    int   index = 0, i;
+    float dist, min;
+
+    index = 0;
+    min = eucledianDistance(testObject, clusters->featureVector[0]);
+    for (i = 1; i < clusters->nFeaturesVectors; i++) {
+        dist = eucledianDistance(testObject, clusters->featureVector[i]);
+        if (dist < min) {
+            min = dist;
+            index = i;
+        }
+    }
+
+    return index;
+}
 
 //void sortAt(FeatureVector featureVector, int lastIndex){
 //

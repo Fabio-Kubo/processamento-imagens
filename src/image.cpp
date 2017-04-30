@@ -1404,7 +1404,7 @@ void writeImagePNG(Image *image,char *filename){
     width = image->nx;
     height = image->ny;
     png_byte bit_depth = image->channelDepth;
-    png_byte color_type;
+    png_byte color_type = -1;
     if(image->colorSpace == RGB) {
         color_type = PNG_COLOR_TYPE_RGB;
     } else if(image->colorSpace == RGBA) {

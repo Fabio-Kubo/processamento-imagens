@@ -69,11 +69,14 @@ FeatureMatrix* computeFeatureVectors(Image* imagePack, int patchSize){
     return featureMatrix;
 }
 
-FeatureMatrix* kMeansClustering(FeatureMatrix* featureMatrix, int numberOfCluster){
+FeatureMatrix* kMeansClustering(FeatureMatrix* featureMatrix, int numberOfCluster) {
     FeatureMatrix* dict = createFeatureMatrix(numberOfCluster);
-    int k = 0;
-    bool *isUsed = (bool*)calloc(featureMatrix->nFeaturesVectors,sizeof(*isUsed));
-    int* labels = (int*)calloc(featureMatrix->nFeaturesVectors,sizeof(*labels));
+    FeatureMatrix* newClusters = createFeatureMatrix(numberOfCluster, featureMatrix->featureVector[0]->size);
+    int i, j, k = 0, index = 0, loop = 0;
+    int *newClusterSize;
+    newClusterSize = (int*) calloc(numberOfCluster, sizeof(int));
+    bool *isUsed = (bool*)calloc(featureMatrix->nFeaturesVectors, sizeof(*isUsed));
+    int* labels = (int*)calloc(featureMatrix->nFeaturesVectors, sizeof(*labels));
     while (k < numberOfCluster) {
         int randomIndex = RandomInteger(0,featureMatrix->nFeaturesVectors);
         if(isUsed[randomIndex] == false){
@@ -82,12 +85,31 @@ FeatureMatrix* kMeansClustering(FeatureMatrix* featureMatrix, int numberOfCluste
             k++;
         }
     }
+
+    do {
+        for (i=0; i < featureMatrix->nFeaturesVectors; i++) {
+            index = findNearestCluster(featureMatrix->featureVector[i], dict);
+
+            newClusterSize[index]++;
+            for (j=0; j < featureMatrix->featureVector[i]->size; j++) {
+                newClusters->featureVector[index]->features[j] += dict->featureVector[i]->features[j];
+            }
+        }
+
+        for (i = 0; i < numberOfCluster; i++) {
+            if (newClusterSize[i] > 0) {
+                for (j = 0; j < dict->featureVector[i]->size; j++) {
+                    dict->featureVector[i]->features[j] =
+                        newClusters->featureVector[index]->features[j] / newClusterSize[i];
+                    newClusters->featureVector[index]->features[j] = 0.0;
+                }
+            }
+            newClusterSize[i] = 0;
+        }
+    } while (loop++ < numberOfCluster);
+
+    destroyFeatureMatrix(&newClusters);
+    free(newClusterSize);
     free(isUsed);
-    //not finished yet
-
-
-
-
-
-    return NULL;
+    return dict;
 }

@@ -53,7 +53,8 @@ void wirteFeatureMatrix(FeatureMatrix* featureMatrix, char *filename);
 void destroyFeatureMatrix(FeatureMatrix** featureMatrix);
 
 
-
+float eucledianDistance(FeatureVector *v1, FeatureVector *v2);
+int findNearestCluster(FeatureVector *testObject, FeatureMatrix *clusters);
 void sortAt(FeatureVector featureVector, int lastIndex);
 
 #endif //LIBFL_FEATUREVECTOR_H
