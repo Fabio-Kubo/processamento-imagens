@@ -7,21 +7,17 @@
 
 FeatureMatrix* computeFeatureVectors(DirectoryManager* directoryManager, int patchSize){
 
-    //Image* currentImage;
-//    Image* patch;
-//    FeatureVector* patchVector;
     int binSize = 64;
     Image* firstImage = readImage(directoryManager->files[0]->path);
     int patchX_axis = firstImage->nx/patchSize;
     int patchY_axis = firstImage->ny/patchSize;
     int numberPatchsPerImage = patchX_axis*patchY_axis;
     int numberPatchs = numberPatchsPerImage*directoryManager->nfiles;
-    //FeatureMatrix* featureMatrix = createFeatureMatrix();
+
     FeatureMatrix* featureMatrix = createFeatureMatrix(numberPatchs);
     destroyImage(&firstImage);
     int k=0;
 
-//#pragma omp parallel for
     for (size_t fileIndex = 0; fileIndex < directoryManager->nfiles; ++fileIndex) {
         Image* currentImage = readImage(directoryManager->files[fileIndex]->path);
 
@@ -35,6 +31,27 @@ FeatureMatrix* computeFeatureVectors(DirectoryManager* directoryManager, int pat
         }
         destroyImage(&currentImage);
     }
+    return featureMatrix;
+}
+
+FeatureMatrix * computeFeatureVectorsImage(Image* image, int patchSize){
+    int binSize = 64;
+    int patchX_axis = image->nx/patchSize;
+    int patchY_axis = image->ny/patchSize;
+    int numberPatchs = patchX_axis*patchY_axis;
+
+    FeatureMatrix* featureMatrix = createFeatureMatrix(numberPatchs);
+    destroyImage(&image);
+    int k=0;
+    for (int y = 0; y <= image->ny-patchSize; y +=patchSize) {
+        for (int x = 0; x <= image->nx-patchSize; x += patchSize) {
+            Image* patch = extractSubImage(image,x,y,patchSize,patchSize,true);
+            featureMatrix->featureVector[k] = computeHistogramForFeatureVector(patch,binSize,true);
+            k++;
+            destroyImage(&patch);
+        }
+    }
+    destroyImage(&image);
     return featureMatrix;
 }
 
@@ -71,45 +88,71 @@ FeatureMatrix* computeFeatureVectors(Image* imagePack, int patchSize){
 
 FeatureMatrix* kMeansClustering(FeatureMatrix* featureMatrix, int numberOfCluster) {
     FeatureMatrix* dict = createFeatureMatrix(numberOfCluster);
-    FeatureMatrix* newClusters = createFeatureMatrix(numberOfCluster, featureMatrix->featureVector[0]->size);
-    int i, j, k = 0, index = 0, loop = 0;
-    int *newClusterSize;
-    newClusterSize = (int*) calloc(numberOfCluster, sizeof(int));
+    FeatureMatrix* newClusters;
+    int i, j, k, index = 0, indexNewCluster, loop;
+
+    int * featureVectorsPerCluster = (int*) calloc(numberOfCluster, sizeof(int));
     bool *isUsed = (bool*)calloc(featureMatrix->nFeaturesVectors, sizeof(*isUsed));
     int* labels = (int*)calloc(featureMatrix->nFeaturesVectors, sizeof(*labels));
+
+    k = 0;
     while (k < numberOfCluster) {
         int randomIndex = RandomInteger(0,featureMatrix->nFeaturesVectors);
-        if(isUsed[randomIndex] == false){
+        if(!isUsed[randomIndex]){
             dict->featureVector[k] = copyFeatureVector(featureMatrix->featureVector[randomIndex]);
             isUsed[randomIndex] = true;
             k++;
         }
     }
 
-    do {
-        for (i=0; i < featureMatrix->nFeaturesVectors; i++) {
-            index = findNearestCluster(featureMatrix->featureVector[i], dict);
+    for (loop = 0; loop < numberOfCluster; loop++) {
+            //initialize newClusters (each feature is initilalized with 0)
+            newClusters = createFeatureMatrix(numberOfCluster, featureMatrix->featureVector[0]->size);
 
-            newClusterSize[index]++;
-            for (j=0; j < featureMatrix->featureVector[i]->size; j++) {
-                newClusters->featureVector[index]->features[j] += dict->featureVector[i]->features[j];
-            }
-        }
+            //Attribute the closest cluster to each data point
+            for (i=0; i < featureMatrix->nFeaturesVectors; i++) {
+                index = findNearestCluster(featureMatrix->featureVector[i], dict);
+                labels[i] = index;
+                featureVectorsPerCluster[index]++;
 
-        for (i = 0; i < numberOfCluster; i++) {
-            if (newClusterSize[i] > 0) {
-                for (j = 0; j < dict->featureVector[i]->size; j++) {
-                    dict->featureVector[i]->features[j] =
-                        newClusters->featureVector[index]->features[j] / newClusterSize[i];
-                    newClusters->featureVector[index]->features[j] = 0.0;
+                //Sum the values to calculate the mean
+                for (j=0; j < featureMatrix->featureVector[i]->size; j++) {
+                    newClusters->featureVector[index]->features[j] += dict->featureVector[i]->features[j];
                 }
             }
-            newClusterSize[i] = 0;
-        }
-    } while (loop++ < numberOfCluster);
+
+            //divide each feature by the number of featureVectors in the actual cluster
+            for (i = 0; i < numberOfCluster; i++) {
+                for (j = 0; j < newClusters->featureVector[i]->size; j++) {
+                  newClusters->featureVector[index]->features[j] =
+                    newClusters->featureVector[index]->features[j] / featureVectorsPerCluster[i];
+                }
+
+                indexNewCluster = findNearestCluster(newClusters->featureVector[index], featureMatrix);
+
+                if(!isUsed[indexNewCluster]){
+                    dict->featureVector[i] = copyFeatureVector(featureMatrix->featureVector[indexNewCluster]);
+                    isUsed[indexNewCluster] = true;
+                    isUsed[i] = false;
+                }
+            }
+      }
 
     destroyFeatureMatrix(&newClusters);
-    free(newClusterSize);
+    free(featureVectorsPerCluster);
     free(isUsed);
+    free(labels);
     return dict;
+}
+
+FeatureVector * computeWordHistogram(FeatureMatrix * imageFeatureMatrix, FeatureMatrix * dictionary){
+    FeatureVector * wordHistogram = createFeatureVector(dictionary->nFeaturesVectors);
+    int closestWordIndex, i;
+
+    for (i = 0; i < imageFeatureMatrix->nFeaturesVectors; i++) {
+        closestWordIndex = findNearestCluster(imageFeatureMatrix->featureVector[i], dictionary);
+        wordHistogram->features[closestWordIndex]++;
+    }
+
+    return wordHistogram;
 }

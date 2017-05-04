@@ -3,8 +3,6 @@
 //
 #include "featureVector.h"
 
-
-
 FeatureVector* createFeatureVector(int size){
     FeatureVector* featureVector = (FeatureVector*)calloc(1,sizeof(FeatureVector));
     featureVector->size = size;
@@ -67,7 +65,7 @@ FeatureVector* createFeatureVector(float* vec,int size){
 }
 
 
-void wirteFeatureVectors(FeatureVector** vectors, int nVectors, char *filename){
+void writeFeatureVectors(FeatureVector** vectors, int nVectors, char *filename){
     FILE *fp = fopen(filename,"w");
     for (int i = 0; i < nVectors; ++i) {
         FeatureVector* vec = vectors[i];
@@ -194,29 +192,32 @@ void printFeatureMatrix(FeatureMatrix* featureMatrix){
     printf("\n");
 }
 
-float eucledianDistance(FeatureVector *v1, FeatureVector *v2) {
+float euclideanDistance(FeatureVector *v1, FeatureVector *v2) {
+    int i, size;
+    float sum;
+
     if (v1->size != v2->size) {
         printf("FeatureVectors size mismatch.\n");
         return -1;
     }
 
-    int size = v1->size;
-    int i;
-    float sum=0.0;
-    for (i=0; i < size; i++)
-        sum += (v1->features[i] - v2->features[i]) * (v1->features[i] - v2->features[i]);
+    size = v1->size;
+    sum=0;
+    for (i=0; i < size; i++){
+        sum+= pow(v1->features[i] - v2->features[i], 2);
+    }
 
     return sqrt(sum);
 }
 
 int findNearestCluster(FeatureVector *testObject, FeatureMatrix *clusters) {
-    int   index = 0, i;
+    int   index, i;
     float dist, min;
 
     index = 0;
-    min = eucledianDistance(testObject, clusters->featureVector[0]);
+    min = euclideanDistance(testObject, clusters->featureVector[0]);
     for (i = 1; i < clusters->nFeaturesVectors; i++) {
-        dist = eucledianDistance(testObject, clusters->featureVector[i]);
+        dist = euclideanDistance(testObject, clusters->featureVector[i]);
         if (dist < min) {
             min = dist;
             index = i;

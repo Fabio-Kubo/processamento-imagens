@@ -310,6 +310,7 @@ FileManager *createFileManager(const char *pathname) {
     else {
         f = (FileManager*) calloc(1, sizeof(FileManager));
         f->path = copyString(pathname);
+        f->label = pathname[3];
         f->suffix = NULL;
         //updateDatasetFileInfo(f);
     }
