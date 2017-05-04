@@ -36,22 +36,24 @@ int main(int argc, char **argv) {
     directoryManager = loadDirectory("../processedData/training", 1);
 
     int* labels = (int *)calloc((int)directoryManager->nfiles, sizeof(int));
-
     matrixWordHistogram = createFeatureMatrix((int)directoryManager->nfiles);
+    vector<vector<int>> controleWordHistogramLabel;
 
     //go through images
     for (int i = 0; i < (int)directoryManager->nfiles; i++) {
         currentImage = readImage(directoryManager->files[fileIndex]->path);
         imageFeatureMatrix = computeFeatureVectorsImage(currentImage, patchSize);
         labels[i] = directoryManager->files[fileIndex]->label;
+        controleWordHistogramLabel[labels[i]].put_back(i);
         matrixWordHistogram->featureVector[i] = computeWordHistogram(imageFeatureMatrix, dictionary);
 
         destroyImage(&currentImage);
         destroyFeatureMatrix(&imageFeatureMatrix);
     }
 
-    //TODO treinar classificador com o wordHistogram e labels (achar os cluster de cada label)
-    FeatureMatrix * clustersClassifier;
+    //Find one cluster data point for each group
+    FeatureMatrix * clustersClassifier = computeClusters(matrixWordHistogram, labels,
+      controleWordHistogramLabel, numberOfCluster);
 
     //free memory
     destroyDirectoryManager(directoryManager);

@@ -3,7 +3,11 @@
 //
 
 #include "bagOfVisualWords.h"
+#include "featureVector.h"
 
+#include <vector>
+
+using namespace std;
 
 FeatureMatrix* computeFeatureVectors(DirectoryManager* directoryManager, int patchSize){
 
@@ -143,6 +147,44 @@ FeatureMatrix* kMeansClustering(FeatureMatrix* featureMatrix, int numberOfCluste
     free(isUsed);
     free(labels);
     return dict;
+}
+
+FeatureMatrix * computeClusters(FeatureMatrix* matrixWordHistogram, int * labels, vector< vector<int> > controleWordHistogramLabel, int numberOfCluster){
+    int i, j, k, currentCentroid;
+    float currentDistance, maxDistance;
+    vector<float> maximumDistanceAsCentroid(matrixWordHistogram->nFeaturesVectors, -1);
+    vector<float> minimumDistanceCluster(numberOfCluster, -1);
+
+    FeatureMatrix * clustersClassifier = createFeatureMatrix(numberOfCluster);
+
+    //for each cluster we calculate its centroid
+    for (i = 0; i < numberOfCluster; i++) {
+        //Select one point as centroid then calculates its max distance to another point
+        for (j = 0; j < (int)controleWordHistogramLabel[i].size(); j++) {
+            currentCentroid = controleWordHistogramLabel[i][j];
+            maxDistance = -1;
+
+            for (k = 0; k < (int)controleWordHistogramLabel[i].size(); k++) {
+                currentDistance = euclideanDistance(matrixWordHistogram->featureVector[currentCentroid],
+                  matrixWordHistogram->featureVector[controleWordHistogramLabel[i][k]]);
+
+                if(currentDistance > maxDistance){
+                    maxDistance = currentDistance;
+                }
+            }
+            maximumDistanceAsCentroid[currentCentroid] = maxDistance;
+        }
+    }
+
+    //find one data point for each group that has the minimum max distance
+    for (i = 0; i < matrixWordHistogram->nFeaturesVectors; i++) {
+        if(minimumDistanceCluster[labels[i]] == -1 ||
+                minimumDistanceCluster[labels[i]] > maximumDistanceAsCentroid[i])
+            clustersClassifier->featureVector[labels[i]] = copyFeatureVector(matrixWordHistogram->featureVector[i]);
+            minimumDistanceCluster[labels[i]] = maximumDistanceAsCentroid[i];
+    }
+
+    return clustersClassifier;
 }
 
 FeatureVector * computeWordHistogram(FeatureMatrix * imageFeatureMatrix, FeatureMatrix * dictionary){
