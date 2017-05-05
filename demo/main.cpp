@@ -58,8 +58,8 @@ int main(int argc, char **argv) {
     }
 
     //Find one cluster data point for each group
-    //FeatureMatrix * clustersClassifier = computeClusters(matrixWordHistogram, labels,
-    //  controleWordHistogramLabel, numberOfCluster);
+    FeatureMatrix * clustersClassifier = computeClusters(matrixWordHistogram, labels,
+      controleWordHistogramLabel, numberOfCluster);
     //free memory
     destroyDirectoryManager(&directoryManager);
 
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     int predictedValue, actualValue, correctAnswers = 0, wrongAnswers = 0;
 
     //go through images
-    for (int i = 0; i < (int)directoryManager->nfiles; ++i) {
+    for (int fileIndex = 0; fileIndex < (int)directoryManager->nfiles; fileIndex++) {
           currentImage = readImage(directoryManager->files[fileIndex]->path);
           imageFeatureMatrix = computeFeatureVectorsImage(currentImage, patchSize);
           actualValue = directoryManager->files[fileIndex]->label;
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
 
     printf("Total: %d\n", correctAnswers+wrongAnswers);
     printf("Correct: %d Wrong:%d\n", correctAnswers , wrongAnswers);
-    printf("Accuracy: %f\n", (float)correctAnswers/(float)wrongAnswers);
+    printf("Accuracy: %f\n", (float)correctAnswers/(float)(correctAnswers + wrongAnswers));
 
     //free memory
     destroyDirectoryManager(&directoryManager);
