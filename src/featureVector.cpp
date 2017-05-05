@@ -125,11 +125,8 @@ FeatureMatrix* createFeatureMatrix(int nFeaturesVectors){
 }
 
 FeatureMatrix* createFeatureMatrix(int nFeaturesVectors,int vectorSize){
-    FeatureMatrix* featureMatrix = NULL;
-    featureMatrix = (FeatureMatrix*)calloc(1,sizeof(FeatureMatrix));
-    featureMatrix->nFeaturesVectors = nFeaturesVectors;
-    featureMatrix->featureVector = (FeatureVector**) calloc((size_t)nFeaturesVectors, sizeof(FeatureVector*));
-    for (int i = 0; i < vectorSize; ++i) {
+    FeatureMatrix* featureMatrix = createFeatureMatrix(nFeaturesVectors);
+    for (int i = 0; i < nFeaturesVectors; i++) {
         featureMatrix->featureVector[i] = createFeatureVector(vectorSize);
     }
     return featureMatrix;
@@ -140,7 +137,6 @@ void destroyFeatureMatrix(FeatureMatrix** featureMatrix){
         return ;
     }
     for (int i = 0; i < (*featureMatrix)->nFeaturesVectors; ++i) {
-        printf("miaus %d\n",i);
         destroyFeatureVector( &((*featureMatrix)->featureVector[i]) );
     }
     free((*featureMatrix)->featureVector);

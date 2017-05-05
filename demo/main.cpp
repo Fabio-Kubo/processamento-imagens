@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
     FeatureMatrix * featureMatrix;
     int patchSize, numberOfCluster, fileIndex, i;
     numberOfCluster = 6;
-    patchSize = 10;
+    patchSize = 50;
 
 /*----------------------------------------------------------------------------*/
 /*---------------------------Computing Dictionary-----------------------------*/
@@ -25,10 +25,10 @@ int main(int argc, char **argv) {
     featureMatrix = computeFeatureVectors(directoryManager, patchSize);
 
     //get the words
-    FeatureMatrix * dictionary = kMeansClustering(featureMatrix, numberOfCluster);
+    FeatureMatrix *dictionary = kMeansClustering(featureMatrix, numberOfCluster);
 
     printf("Words computed...\n");
-    //free memory
+//    //free memory
     destroyDirectoryManager(&directoryManager);
     destroyFeatureMatrix(&featureMatrix);
 /*----------------------------------------------------------------------------*/
@@ -43,13 +43,14 @@ int main(int argc, char **argv) {
 
     int* labels = (int *)calloc((int)directoryManager->nfiles, sizeof(int));
     matrixWordHistogram = createFeatureMatrix((int)directoryManager->nfiles);
-    vector< vector<int> > controleWordHistogramLabel;
+    vector< vector<int> > controleWordHistogramLabel(dictionary->nFeaturesVectors, vector<int>(0));
 
     //go through images
     for (fileIndex = 0; fileIndex < (int)directoryManager->nfiles; fileIndex++) {
         currentImage = readImage(directoryManager->files[fileIndex]->path);
         imageFeatureMatrix = computeFeatureVectorsImage(currentImage, patchSize);
         labels[i] = directoryManager->files[fileIndex]->label;
+
         controleWordHistogramLabel[labels[i]].push_back(i);
         matrixWordHistogram->featureVector[i] = computeWordHistogram(imageFeatureMatrix, dictionary);
 
@@ -58,17 +59,17 @@ int main(int argc, char **argv) {
     }
 
     //Find one cluster data point for each group
-    FeatureMatrix * clustersClassifier = computeClusters(matrixWordHistogram, labels,
-      controleWordHistogramLabel, numberOfCluster);
+    //FeatureMatrix * clustersClassifier = computeClusters(matrixWordHistogram, labels,
+    //  controleWordHistogramLabel, numberOfCluster);
 
     //free memory
-    destroyDirectoryManager(&directoryManager);
+    //destroyDirectoryManager(&directoryManager);
 
 /*----------------------------------------------------------------------------*/
 /*--------------------------------TEST----------------------------------------*/
 /*----------------------------------------------------------------------------*/
     //Load test images
-    directoryManager = loadDirectory("../processedData/test", 1);
+   /* directoryManager = loadDirectory("../processedData/test", 1);
     FeatureVector * vectorWordHistogram;
 
     int predictedValue, actualValue, correctAnswers = 0, wrongAnswers = 0;
@@ -97,6 +98,6 @@ int main(int argc, char **argv) {
 
     //free memory
     destroyDirectoryManager(&directoryManager);
-
+*/
     return 0;
 }

@@ -706,7 +706,7 @@ void destroyImage(Image**image ){
     if(auxPointer == NULL){
         return;
     }
-    for (int i = 0; i < auxPointer->nchannels; ++i) {
+    for (int i = 0; i < auxPointer->nchannels; i++) {
         free(auxPointer->channel[i]);
     }
     free(auxPointer);
