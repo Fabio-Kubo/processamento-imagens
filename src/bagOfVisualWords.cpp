@@ -93,7 +93,7 @@ FeatureMatrix* computeFeatureVectors(Image* imagePack, int patchSize){
 FeatureMatrix* kMeansClustering(FeatureMatrix* featureMatrix, int numberOfCluster) {
     FeatureMatrix* dict = createFeatureMatrix(numberOfCluster);
     FeatureMatrix* newClusters;
-    int i, j, k, index = 0, indexNewCluster, loop;
+    int i, j, k, index = 0, indexNewCluster, delta = 0;
 
     int * featureVectorsPerCluster = (int*) calloc(numberOfCluster, sizeof(int));
     bool *isUsed = (bool*)calloc(featureMatrix->nFeaturesVectors, sizeof(*isUsed));
@@ -109,7 +109,8 @@ FeatureMatrix* kMeansClustering(FeatureMatrix* featureMatrix, int numberOfCluste
         }
     }
 
-    for (loop = 0; loop < numberOfCluster; loop++) {
+    int threshhold = 20;
+    while (delta < threshhold) {
             //initialize newClusters (each feature is initilalized with 0)
             newClusters = createFeatureMatrix(numberOfCluster, featureMatrix->featureVector[0]->size);
 
@@ -140,6 +141,7 @@ FeatureMatrix* kMeansClustering(FeatureMatrix* featureMatrix, int numberOfCluste
                     isUsed[i] = false;
                 }
             }
+            delta++;
       }
 
     destroyFeatureMatrix(&newClusters);

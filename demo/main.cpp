@@ -8,9 +8,7 @@ int main(int argc, char **argv) {
 
     DirectoryManager* directoryManager;
     FeatureMatrix * featureMatrix;
-    int patchSize, numberOfCluster, fileIndex, i,
-      * expectedLabels, *predictedLabels;
-
+    int patchSize, numberOfCluster, fileIndex, i;
     numberOfCluster = 6;
     patchSize = 10;
 
@@ -71,7 +69,6 @@ int main(int argc, char **argv) {
 /*----------------------------------------------------------------------------*/
     //Load test images
     directoryManager = loadDirectory("../processedData/test", 1);
-    FeatureVector * wordHistogram;
     FeatureVector * vectorWordHistogram;
 
     int predictedValue, actualValue, correctAnswers = 0, wrongAnswers = 0;
@@ -100,8 +97,6 @@ int main(int argc, char **argv) {
 
     //free memory
     destroyDirectoryManager(&directoryManager);
-    free(expectedLabels);
-    free(predictedLabels);
 
     return 0;
 }
