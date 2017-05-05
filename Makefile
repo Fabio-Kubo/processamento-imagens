@@ -33,6 +33,7 @@ $(OBJ)/histogram.o \
 $(OBJ)/morphology.o \
 $(OBJ)/filtering.o \
 $(OBJ)/bagOfVisualWords.o \
+$(OBJ)/main.o \
 
 	ar csr $(LIB)/libFL.a \
 $(OBJ)/common.o \
@@ -46,6 +47,7 @@ $(OBJ)/histogram.o \
 $(OBJ)/morphology.o \
 $(OBJ)/filtering.o \
 $(OBJ)/bagOfVisualWords.o \
+$(OBJ)/main.o \
 ./externals/zlib/obj/*.o \
 ./externals/libpng/obj/*.o \
 ./externals/libjpeg/obj/*.o \
@@ -82,7 +84,6 @@ $(OBJ)/histogram.o: $(SRC)/histogram.cpp
 	$(CC) $(FLAGSIM) -c $(SRC)/histogram.cpp -I$(INCLUDE) \
 	-o $(OBJ)/histogram.o
 
-
 $(OBJ)/morphology.o: $(SRC)/morphology.cpp
 	$(CC) $(FLAGSIM) -c $(SRC)/morphology.cpp -I$(INCLUDE) \
 	-o $(OBJ)/morphology.o
@@ -95,13 +96,17 @@ $(OBJ)/bagOfVisualWords.o: $(SRC)/bagOfVisualWords.cpp
 	$(CC) $(FLAGSIM) -c $(SRC)/bagOfVisualWords.cpp -I$(INCLUDE) \
 	-o $(OBJ)/bagOfVisualWords.o
 
+$(OBJ)/main.o: $(SRC)/main.cpp
+	$(CC) $(FLAGSIM) -c $(SRC)/main.cpp -I$(INCLUDE) \
+	-o $(OBJ)/main.o
+
 lpng:
 	cd externals/libpng; $(MAKE) ; cd -\
 
 ljpeg:
 	cd externals/libjpeg; $(MAKE) ; cd -\
 
-clean: 
+clean:
 	rm $(LIB)/lib*.a; rm $(OBJ)/*.o
 
 cleanAll:

@@ -1,11 +1,15 @@
+#include <vector>
 #include "FL.h"
 #include "bagOfVisualWords.h"
+
+using namespace std;
 
 int main(int argc, char **argv) {
 
     DirectoryManager* directoryManager;
     FeatureMatrix * featureMatrix;
-    int patchSize, numberOfCluster;
+    int patchSize, numberOfCluster, fileIndex, i,
+      * expectedLabels, *predictedLabels;
 
     numberOfCluster = 6;
     patchSize = 10;
@@ -13,6 +17,8 @@ int main(int argc, char **argv) {
 /*----------------------------------------------------------------------------*/
 /*---------------------------Computing Dictionary-----------------------------*/
 /*----------------------------------------------------------------------------*/
+
+    printf("Computing words...\n");
 
     //Load dictionary images
     directoryManager = loadDirectory("../processedData/dictionary-creation", 1);
@@ -23,8 +29,9 @@ int main(int argc, char **argv) {
     //get the words
     FeatureMatrix * dictionary = kMeansClustering(featureMatrix, numberOfCluster);
 
+    printf("Words computed...\n");
     //free memory
-    destroyDirectoryManager(directoryManager);
+    destroyDirectoryManager(&directoryManager);
     destroyFeatureMatrix(&featureMatrix);
 /*----------------------------------------------------------------------------*/
 /*--------------------------------TRAINING------------------------------------*/
@@ -32,19 +39,20 @@ int main(int argc, char **argv) {
     FeatureMatrix * imageFeatureMatrix, * matrixWordHistogram;
     Image* currentImage;
 
+    printf("Training initializing...\n");
     //Load training images
     directoryManager = loadDirectory("../processedData/training", 1);
 
     int* labels = (int *)calloc((int)directoryManager->nfiles, sizeof(int));
     matrixWordHistogram = createFeatureMatrix((int)directoryManager->nfiles);
-    vector<vector<int>> controleWordHistogramLabel;
+    vector< vector<int> > controleWordHistogramLabel;
 
     //go through images
-    for (int i = 0; i < (int)directoryManager->nfiles; i++) {
+    for (fileIndex = 0; fileIndex < (int)directoryManager->nfiles; fileIndex++) {
         currentImage = readImage(directoryManager->files[fileIndex]->path);
         imageFeatureMatrix = computeFeatureVectorsImage(currentImage, patchSize);
         labels[i] = directoryManager->files[fileIndex]->label;
-        controleWordHistogramLabel[labels[i]].put_back(i);
+        controleWordHistogramLabel[labels[i]].push_back(i);
         matrixWordHistogram->featureVector[i] = computeWordHistogram(imageFeatureMatrix, dictionary);
 
         destroyImage(&currentImage);
@@ -56,7 +64,7 @@ int main(int argc, char **argv) {
       controleWordHistogramLabel, numberOfCluster);
 
     //free memory
-    destroyDirectoryManager(directoryManager);
+    destroyDirectoryManager(&directoryManager);
 
 /*----------------------------------------------------------------------------*/
 /*--------------------------------TEST----------------------------------------*/
@@ -64,6 +72,7 @@ int main(int argc, char **argv) {
     //Load test images
     directoryManager = loadDirectory("../processedData/test", 1);
     FeatureVector * wordHistogram;
+    FeatureVector * vectorWordHistogram;
 
     int predictedValue, actualValue, correctAnswers = 0, wrongAnswers = 0;
 
@@ -86,12 +95,11 @@ int main(int argc, char **argv) {
     }
 
     printf("Total: %d\n", correctAnswers+wrongAnswers);
-    printf("Correct: %d Wrong:\n", correctAnswers , wrongAnswers);
+    printf("Correct: %d Wrong:%d\n", correctAnswers , wrongAnswers);
     printf("Accuracy: %f\n", (float)correctAnswers/(float)wrongAnswers);
 
     //free memory
-    destroyDirectoryManager(directoryManager);
-    destroyFeatureMatrix();
+    destroyDirectoryManager(&directoryManager);
     free(expectedLabels);
     free(predictedLabels);
 

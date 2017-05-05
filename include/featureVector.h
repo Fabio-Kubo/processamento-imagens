@@ -10,6 +10,7 @@
 #define _FEATUREVECTOR_H_
 
 #include "common.h"
+#include "image.h"
 
 typedef struct _featureVector {
     float* features;
@@ -55,7 +56,7 @@ void destroyFeatureMatrix(FeatureMatrix** featureMatrix);
 
 float euclideanDistance(FeatureVector *v1, FeatureVector *v2);
 int findNearestCluster(FeatureVector *testObject, FeatureMatrix *clusters);
-int findNearestCluster(FeatureVector *testObject, FeatureMatrix *clusters);
 void sortAt(FeatureVector featureVector, int lastIndex);
+FeatureMatrix * computeFeatureVectorsImage(Image* image, int patchSize);
 
 #endif //LIBFL_FEATUREVECTOR_H
