@@ -102,8 +102,8 @@ float vectorDifference(FeatureVector* vector1,FeatureVector* vector2){
     return difference;
 }
 
-FeatureVector* copyFeatureVector(FeatureVector* featureVector){
-    return createFeatureVector(featureVector->features,featureVector->size);
+FeatureVector* copyFeatureVector(FeatureVector* featureVector) {
+    return createFeatureVector(featureVector->features, featureVector->size);
 }
 
 

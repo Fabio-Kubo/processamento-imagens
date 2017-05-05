@@ -49,11 +49,10 @@ int main(int argc, char **argv) {
     for (fileIndex = 0; fileIndex < (int)directoryManager->nfiles; fileIndex++) {
         currentImage = readImage(directoryManager->files[fileIndex]->path);
         imageFeatureMatrix = computeFeatureVectorsImage(currentImage, patchSize);
-        labels[i] = directoryManager->files[fileIndex]->label;
+        labels[fileIndex] = directoryManager->files[fileIndex]->label;
 
-        controleWordHistogramLabel[labels[i]].push_back(i);
-        matrixWordHistogram->featureVector[i] = computeWordHistogram(imageFeatureMatrix, dictionary);
-
+        controleWordHistogramLabel[labels[fileIndex]].push_back(fileIndex);
+        matrixWordHistogram->featureVector[fileIndex] = computeWordHistogram(imageFeatureMatrix, dictionary);
         destroyImage(&currentImage);
         destroyFeatureMatrix(&imageFeatureMatrix);
     }
@@ -61,15 +60,14 @@ int main(int argc, char **argv) {
     //Find one cluster data point for each group
     //FeatureMatrix * clustersClassifier = computeClusters(matrixWordHistogram, labels,
     //  controleWordHistogramLabel, numberOfCluster);
-
     //free memory
-    //destroyDirectoryManager(&directoryManager);
+    destroyDirectoryManager(&directoryManager);
 
 /*----------------------------------------------------------------------------*/
 /*--------------------------------TEST----------------------------------------*/
 /*----------------------------------------------------------------------------*/
     //Load test images
-   /* directoryManager = loadDirectory("../processedData/test", 1);
+    directoryManager = loadDirectory("../processedData/test", 1);
     FeatureVector * vectorWordHistogram;
 
     int predictedValue, actualValue, correctAnswers = 0, wrongAnswers = 0;
@@ -98,6 +96,6 @@ int main(int argc, char **argv) {
 
     //free memory
     destroyDirectoryManager(&directoryManager);
-*/
+
     return 0;
 }
