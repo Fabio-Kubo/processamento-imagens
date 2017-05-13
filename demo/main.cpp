@@ -8,9 +8,9 @@ int main(int argc, char **argv) {
 
     DirectoryManager* directoryManager;
     FeatureMatrix * featureMatrix;
-    int patchSize, numberOfCluster, fileIndex, i;
-    numberOfCluster = 6;
-    patchSize = 50;
+    int patchSize, numberOfCluster, fileIndex;
+    numberOfCluster = 9;
+    patchSize = 30;
 
 /*----------------------------------------------------------------------------*/
 /*---------------------------Computing Dictionary-----------------------------*/
@@ -50,7 +50,6 @@ int main(int argc, char **argv) {
         currentImage = readImage(directoryManager->files[fileIndex]->path);
         imageFeatureMatrix = computeFeatureVectorsImage(currentImage, patchSize);
         labels[fileIndex] = directoryManager->files[fileIndex]->label;
-
         controleWordHistogramLabel[labels[fileIndex]].push_back(fileIndex);
         matrixWordHistogram->featureVector[fileIndex] = computeWordHistogram(imageFeatureMatrix, dictionary);
         destroyImage(&currentImage);
@@ -70,7 +69,7 @@ int main(int argc, char **argv) {
     directoryManager = loadDirectory("../processedData/test", 1);
     FeatureVector * vectorWordHistogram;
 
-    int predictedValue, actualValue, correctAnswers = 0, wrongAnswers = 0;
+    int nearest, predictedValue, actualValue, correctAnswers = 0, wrongAnswers = 0;
 
     //go through images
     for (int fileIndex = 0; fileIndex < (int)directoryManager->nfiles; fileIndex++) {
@@ -78,8 +77,9 @@ int main(int argc, char **argv) {
           imageFeatureMatrix = computeFeatureVectorsImage(currentImage, patchSize);
           actualValue = directoryManager->files[fileIndex]->label;
           vectorWordHistogram = computeWordHistogram(imageFeatureMatrix, dictionary);
-          predictedValue = findNearestCluster(vectorWordHistogram, clustersClassifier);
 
+          nearest = findNearestCluster(vectorWordHistogram, clustersClassifier);
+          predictedValue = nearest;
           if(actualValue == predictedValue)
               correctAnswers++;
           else

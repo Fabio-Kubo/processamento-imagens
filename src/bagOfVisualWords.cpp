@@ -107,7 +107,7 @@ FeatureMatrix* kMeansClustering(FeatureMatrix* featureMatrix, int numberOfCluste
         }
     }
 
-    int threshhold = 20;
+    int threshhold = 10;
     while (delta < threshhold) {
         //initialize newClusters (each feature is initilalized with 0)
         newClusters = createFeatureMatrix(numberOfCluster, featureMatrix->featureVector[0]->size);

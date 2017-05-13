@@ -179,8 +179,22 @@ void listDirectoryRecursively(DirectoryManager *dir, size_t hier_levels, size_t 
                         dir->subdirs[j++] = subdir;
                     }
                     else { // it is a File
+                        char** tokens;
+                        int label = 0;
+                        tokens = str_split(pathname, '_');
+                        if (tokens) {
+                            int i;
+                            for (i = 0; *(tokens + i); i++) {
+                                if (1 == i) {
+                                    label = (int) *(*(tokens + i)) - 48;
+                                }
+                                free(*(tokens + i));
+                            }
+                            free(tokens);
+                        }
                         FileManager *f = (FileManager*) calloc(1, sizeof(FileManager));
                         f->path = pathname;
+                        f->label = label;
                         dir->files[i++] = f;
                         f->suffix = NULL;
                     }
@@ -428,3 +442,47 @@ void destroyFileSet(FileSet **farr) {
 //
 //    return base;
 //}
+
+char** str_split(char* a_str, const char a_delim)
+{
+    char** result    = 0;
+
+    size_t count     = 0;
+    char* tmp        = a_str;
+    char* last_comma = 0;
+    char delim[2];
+    delim[0] = a_delim;
+    delim[1] = 0;
+
+    /* Count how many elements will be extracted. */
+    while (*tmp) {
+        if (a_delim == *tmp) {
+            count++;
+            last_comma = tmp;
+        }
+        tmp++;
+    }
+
+    /* Add space for trailing token. */
+    count += last_comma < (a_str + strlen(a_str) - 1);
+
+    /* Add space for terminating null string so caller
+       knows where the list of returned strings ends. */
+    count++;
+
+    result = (char**) malloc(sizeof(char*) * count);
+
+    if (result) {
+        size_t idx  = 0;
+        char* temp = strdup(a_str);
+        char* token = strsep(&temp, delim);
+
+        while (token != NULL) {
+            *(result + idx++) = strdup(token);
+            token = strsep(&temp, delim);
+        }
+        *(result + idx) = 0;
+    }
+
+    return result;
+}

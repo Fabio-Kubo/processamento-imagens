@@ -74,5 +74,7 @@ void destroyDirectoryManager(DirectoryManager **directoryManager);
 void destroyFileManager(FileManager **fileManager);
 void destroyFileSet(FileSet **farr);
 
+char** str_split(char* a_str, const char a_delim);
+
 
 #endif //LIBFL_FILE_H
