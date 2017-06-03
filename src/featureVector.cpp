@@ -1,6 +1,7 @@
 //
 // Created by deangeli on 3/27/17.
 //
+
 #include "featureVector.h"
 
 FeatureVector* createFeatureVector(int size){
@@ -77,6 +78,7 @@ void writeFeatureVectors(FeatureVector** vectors, int nVectors, char *filename){
         }
         fprintf(fp,"\n");
     }
+    fclose(fp);
 }
 
 
@@ -102,8 +104,36 @@ float vectorDifference(FeatureVector* vector1,FeatureVector* vector2){
     return difference;
 }
 
-FeatureVector* copyFeatureVector(FeatureVector* featureVector) {
-    return createFeatureVector(featureVector->features, featureVector->size);
+FeatureVector* copyFeatureVector(FeatureVector* featureVector){
+    return createFeatureVector(featureVector->features,featureVector->size);
+}
+
+
+
+double computeL1NormBetweenFeatureVectors(FeatureVector *featureVector1,FeatureVector *featureVector2){
+    double totalRelativeDistance = 0;
+    double featDistance = 0;
+    for (int i = 0; i < featureVector1->size; ++i) {
+        featDistance = (featureVector1->features[i]-featureVector2->features[i]);
+        if(featDistance < 0){
+            featDistance *= -1;
+        }
+        totalRelativeDistance += featDistance;
+    }
+    totalRelativeDistance /= featureVector1->size;
+    return totalRelativeDistance;
+}
+
+void featureVectorAdditionInplace(FeatureVector *featureVector1,FeatureVector *featureVector2){
+    for (int i = 0; i < featureVector2->size; ++i) {
+        featureVector2->features[i] = featureVector1->features[i]+featureVector1->features[i];
+    }
+}
+
+void setValueInFeatureVector(FeatureVector *featureVector,float value){
+    for (int i = 0; i < featureVector->size; ++i) {
+        featureVector->features[i] = value;
+    }
 }
 
 
@@ -120,13 +150,16 @@ FeatureMatrix* createFeatureMatrix(int nFeaturesVectors){
     FeatureMatrix* featureMatrix = NULL;
     featureMatrix = (FeatureMatrix*)calloc(1,sizeof(FeatureMatrix));
     featureMatrix->nFeaturesVectors = nFeaturesVectors;
-    featureMatrix->featureVector = (FeatureVector**) calloc((size_t)nFeaturesVectors, sizeof(FeatureVector*));
+    featureMatrix->featureVector = (FeatureVector**)calloc((size_t)nFeaturesVectors,sizeof(FeatureVector*));
     return featureMatrix;
 }
 
 FeatureMatrix* createFeatureMatrix(int nFeaturesVectors,int vectorSize){
-    FeatureMatrix* featureMatrix = createFeatureMatrix(nFeaturesVectors);
-    for (int i = 0; i < nFeaturesVectors; i++) {
+    FeatureMatrix* featureMatrix = NULL;
+    featureMatrix = (FeatureMatrix*)calloc(1,sizeof(FeatureMatrix));
+    featureMatrix->nFeaturesVectors = nFeaturesVectors;
+    featureMatrix->featureVector = (FeatureVector**)calloc((size_t)nFeaturesVectors,sizeof(FeatureVector*));
+    for (int i = 0; i < nFeaturesVectors; ++i) {
         featureMatrix->featureVector[i] = createFeatureVector(vectorSize);
     }
     return featureMatrix;
@@ -144,7 +177,7 @@ void destroyFeatureMatrix(FeatureMatrix** featureMatrix){
     *featureMatrix = NULL;
 }
 
-void wirteFeatureMatrix(FeatureMatrix* featureMatrix, char *filename){
+void writeFeatureMatrix(FeatureMatrix* featureMatrix, char *filename){
     FILE *fp = fopen(filename,"w");
     for (int i = 0; i < featureMatrix->nFeaturesVectors; ++i) {
         FeatureVector* vec = featureMatrix->featureVector[i];
@@ -156,6 +189,7 @@ void wirteFeatureMatrix(FeatureMatrix* featureMatrix, char *filename){
         }
         fprintf(fp,"\n");
     }
+    fclose(fp);
 }
 
 void addNewLines(FeatureMatrix** featureMatrix, int numberNewLines){
@@ -188,47 +222,72 @@ void printFeatureMatrix(FeatureMatrix* featureMatrix){
     printf("\n");
 }
 
-float euclideanDistance(FeatureVector *v1, FeatureVector *v2) {
-    int i, size;
-    float sum;
-
-    if (v1->size != v2->size) {
-        printf("FeatureVectors size mismatch.\n");
-        return -1;
+FeatureMatrix* copyFeatureMatrix(FeatureMatrix* featureMatrix){
+    FeatureMatrix *copy = createFeatureMatrix(featureMatrix->nFeaturesVectors);
+    for (int i = 0; i < featureMatrix->nFeaturesVectors; ++i) {
+        copy->featureVector[i] = copyFeatureVector(featureMatrix->featureVector[i]);
     }
-
-    size = v1->size;
-    sum=0;
-    for (i=0; i < size; i++){
-        sum+= pow(v1->features[i] - v2->features[i], 2);
-    }
-
-    return sqrt(sum);
+    return copy;
 }
 
-int findNearestCluster(FeatureVector *testObject, FeatureMatrix *clusters) {
-    int   index, i;
-    float dist, min;
+int findNearestVectorUsingL1Norm(FeatureMatrix* featureMatrix, FeatureVector *featureVector){
+    int nearestClusterIndex = -1;
+    double distance;
+    double minDistance = DBL_MAX;
+    for (int i = 0; i < featureMatrix->nFeaturesVectors; ++i) {
+        distance = computeL1NormBetweenFeatureVectors(featureVector,
+                                                      featureMatrix->featureVector[i]);
 
-    index = 0;
-    min = euclideanDistance(testObject, clusters->featureVector[0]);
-    for (i = 1; i < clusters->nFeaturesVectors; i++) {
-        dist = euclideanDistance(testObject, clusters->featureVector[i]);
-        if (dist < min) {
-            min = dist;
-            index = i;
+        if(minDistance > distance){
+            minDistance = distance;
+            nearestClusterIndex = i;
+        }
+
+    }
+    return nearestClusterIndex;
+}
+
+void writeFeatureMatrix(FeatureMatrix *featureMatrix, char *filename, bool sameSize){
+    if(featureMatrix == NULL){
+        printf("[wirteFeatureMatrix] feature matrix is null");
+        return ;
+    }
+    if(featureMatrix->nFeaturesVectors <= 0){
+        printf("[wirteFeatureMatrix] invalid number of features vectors");
+        return ;
+    }
+
+    FILE *fp = fopen(filename,"w");
+    if(sameSize){
+        fprintf(fp,",1\n"); //uniform
+        fprintf(fp,"%d %d\n",featureMatrix->nFeaturesVectors, featureMatrix->featureVector[0]->size);
+        for (int i = 0; i < featureMatrix->nFeaturesVectors; ++i) {
+            FeatureVector* vec = featureMatrix->featureVector[i];
+            for (int j = 0; j < vec->size; ++j) {
+                fprintf(fp,"%f",vec->features[j]);
+                if(!(j == vec->size-1)){
+                    fprintf(fp," ");
+                }
+            }
+            fprintf(fp,"\n");
+        }
+    }else{
+        fprintf(fp,",2\n"); //not uniform
+        fprintf(fp,"%d\n",featureMatrix->nFeaturesVectors);
+        for (int i = 0; i < featureMatrix->nFeaturesVectors; ++i) {
+            FeatureVector* vec = featureMatrix->featureVector[i];
+            fprintf(fp,"%d\n",vec->size);
+            for (int j = 0; j < vec->size; ++j) {
+                fprintf(fp,"%f",vec->features[j]);
+                if(!(j == vec->size-1)){
+                    fprintf(fp," ");
+                }
+            }
+            fprintf(fp,"\n");
         }
     }
-
-    return index;
 }
 
-//void sortAt(FeatureVector featureVector, int lastIndex){
-//
-//    for (int i = lastIndex-1; i >= 0 ; --i) {
-//        if(featureVector.features[lastIndex] > featureVector.features[i]){
-//            break;
-//        }
-//    }
-//    //featureVector
-//}
+
+
+

@@ -185,7 +185,7 @@ void setSVMDefaultParameters(SVM_Classifier* svmClassifier){
     svmClassifier->param.svm_type = C_SVC;
     svmClassifier->param.kernel_type = RBF;
     svmClassifier->param.degree = 3;
-    svmClassifier->param.gamma = 0; // 1/num_features
+    svmClassifier->param.gamma = 0;	// 1/num_features
     svmClassifier->param.coef0 = 0;
     svmClassifier->param.nu = 0.5;
     svmClassifier->param.cache_size = 100;

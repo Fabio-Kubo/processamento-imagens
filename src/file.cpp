@@ -29,6 +29,47 @@ DirectoryManager *loadDirectory(const char *dir_pathname, size_t hier_levels) {
     return dir;
 }
 
+int findTrueLabelInName(char *pathname){
+    char *posLastSlash = NULL;
+    char *posLastUnderScore = NULL;
+    //char *posLastPoint = NULL;
+    char labelNumber[10];
+    int k = 0;
+    size_t nChars;
+    posLastSlash = strrchr(pathname,'/') +1;
+    posLastUnderScore = strrchr(pathname,'_');
+
+    if(posLastSlash == NULL && posLastUnderScore == NULL){
+        return -1;
+    }if(posLastSlash == NULL){
+        nChars = posLastUnderScore-pathname;
+        for (size_t i = 0; i < nChars; ++i) {
+            labelNumber[i] = pathname[i];
+            k++;
+        }
+        labelNumber[k] = '\0';
+        int label = atoi(labelNumber);
+        return label;
+    }
+
+    nChars = posLastUnderScore - posLastSlash;
+    for (size_t i = 0; i < nChars; ++i) {
+        labelNumber[i] = posLastSlash[i];
+        k++;
+    }
+    labelNumber[k] = '\0';
+    int label = atoi(labelNumber);
+    return label;
+}
+
+void findTrueLabelInCurrentDirectory(DirectoryManager *directoryManager){
+
+    for (size_t j = 0; j < directoryManager->nfiles; ++j) {
+        directoryManager->files[j]->label = findTrueLabelInName(directoryManager->files[j]->path);
+        printf("%d\n",directoryManager->files[j]->label);
+    }
+}
+
 bool pathnameExists(const char *pathname) {
     struct stat buffer;
     return (stat (pathname, &buffer) == 0);
@@ -179,22 +220,8 @@ void listDirectoryRecursively(DirectoryManager *dir, size_t hier_levels, size_t 
                         dir->subdirs[j++] = subdir;
                     }
                     else { // it is a File
-                        char** tokens;
-                        int label = 0;
-                        tokens = str_split(pathname, '_');
-                        if (tokens) {
-                            int i;
-                            for (i = 0; *(tokens + i); i++) {
-                                if (1 == i) {
-                                    label = (int) *(*(tokens + i)) - 48;
-                                }
-                                free(*(tokens + i));
-                            }
-                            free(tokens);
-                        }
                         FileManager *f = (FileManager*) calloc(1, sizeof(FileManager));
                         f->path = pathname;
-                        f->label = label;
                         dir->files[i++] = f;
                         f->suffix = NULL;
                     }
@@ -324,7 +351,6 @@ FileManager *createFileManager(const char *pathname) {
     else {
         f = (FileManager*) calloc(1, sizeof(FileManager));
         f->path = copyString(pathname);
-        f->label = pathname[3];
         f->suffix = NULL;
         //updateDatasetFileInfo(f);
     }
@@ -356,7 +382,7 @@ void destroyFileManager(FileManager **fileManager) {
 }
 
 void destroyDirectoryManager(DirectoryManager **directoryManager) {
-    if (destroyDirectoryManager != NULL) {
+    if (*directoryManager != NULL) {
         DirectoryManager *dir_aux = *directoryManager;
 
         if (dir_aux != NULL) {
@@ -443,46 +469,34 @@ void destroyFileSet(FileSet **farr) {
 //    return base;
 //}
 
-char** str_split(char* a_str, const char a_delim)
-{
-    char** result    = 0;
-
-    size_t count     = 0;
-    char* tmp        = a_str;
-    char* last_comma = 0;
-    char delim[2];
-    delim[0] = a_delim;
-    delim[1] = 0;
-
-    /* Count how many elements will be extracted. */
-    while (*tmp) {
-        if (a_delim == *tmp) {
-            count++;
-            last_comma = tmp;
-        }
-        tmp++;
+void destroyCharPointer(void* data){
+    char* aux = *((char**) data);
+    if(aux == NULL){
+        return;
     }
-
-    /* Add space for trailing token. */
-    count += last_comma < (a_str + strlen(a_str) - 1);
-
-    /* Add space for terminating null string so caller
-       knows where the list of returned strings ends. */
-    count++;
-
-    result = (char**) malloc(sizeof(char*) * count);
-
-    if (result) {
-        size_t idx  = 0;
-        char* temp = strdup(a_str);
-        char* token = strsep(&temp, delim);
-
-        while (token != NULL) {
-            *(result + idx++) = strdup(token);
-            token = strsep(&temp, delim);
-        }
-        *(result + idx) = 0;
-    }
-
-    return result;
+    free(aux);
+    data = NULL;
+    aux = NULL;
 }
+
+GVector* splitsLinesInTextFile(const char* filename){
+    size_t initalSize = 10;
+    GVector* vector = createVector(initalSize,sizeof(char*));
+    vector->freeFunction = destroyCharPointer;
+    FILE* file = fopen(filename, "r");
+    char line[256];
+    int index;
+    while (fgets(line, sizeof(line), file)) {
+        char* path = (char*)calloc(sizeof(line)+1,sizeof(char));
+        index = 0;
+        while(line[index] != '\n'){
+            path[index] = line[index];
+            index++;
+        }
+        path[index] = '\0';
+        VECTOR_PUSH_BACK(char*,vector,path);
+    }
+    shrinkToFit(vector);
+    return vector;
+}
+

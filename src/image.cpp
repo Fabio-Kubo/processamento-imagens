@@ -5,628 +5,7 @@
  * of the MIT license.
  *
  */
-
 #include "image.h"
-
-
-GrayImage *createGrayImage(int ncols, int nrows)
-{
-    GrayImage *img=NULL;
-    int i;
-
-    img = (GrayImage *) calloc(1,sizeof(GrayImage));
-    if (img == NULL){
-        Error(MSG1,"CreateImage");
-    }
-
-    img->val   = AllocIntArray(nrows*ncols);
-    img->tbrow = AllocIntArray(nrows);
-
-    img->tbrow[0]=0;
-    for (i=1; i < nrows; i++)
-        img->tbrow[i]=img->tbrow[i-1]+ncols;
-    img->ncols = ncols;
-    img->nrows = nrows;
-
-    return(img);
-}
-
-void destroyGrayImage(GrayImage **img)
-{
-    GrayImage *aux;
-
-    aux = *img;
-    if(aux != NULL){
-        if (aux->val != NULL)   free(aux->val);
-        if (aux->tbrow != NULL) free(aux->tbrow);
-        free(aux);
-        *img = NULL;
-    }
-}
-
-GrayImage *readGrayImage(char *filename)
-{
-    FILE *fp=NULL;
-    unsigned char *value=NULL;
-    char type[10];
-    int  i,ncols,nrows,n;
-    GrayImage *img = NULL;
-    char z[256];
-
-    fp = fopen(filename,"rb");
-    if (fp == NULL){
-        fprintf(stderr,"Cannot open %s\n",filename);
-        exit(-1);
-    }
-    fscanf(fp,"%s\n",type);
-    if((strcmp(type,"P5")==0)){
-        NCFgets(z,255,fp);
-        sscanf(z,"%d %d\n",&ncols,&nrows);
-        n = ncols*nrows;
-        NCFgets(z,255,fp);
-        sscanf(z,"%d\n",&i);
-        fgetc(fp);
-        value = (unsigned char *)calloc(n,sizeof(unsigned char));
-        if (value != NULL){
-            fread(value,sizeof(unsigned char),n,fp);
-        }else{
-            fprintf(stderr,"Insufficient memory in ReadImage\n");
-            exit(-1);
-        }
-        fclose(fp);
-        img = createGrayImage(ncols,nrows);
-        for (i=0; i < n; i++)
-            img->val[i]=(int)value[i];
-        free(value);
-    }else{
-        if((strcmp(type,"P2")==0)){
-            NCFgets(z,255,fp);
-            sscanf(z,"%d %d\n",&ncols,&nrows);
-            n = ncols*nrows;
-            NCFgets(z,255,fp);
-            sscanf(z,"%d\n",&i);
-            img = createGrayImage(ncols,nrows);
-            for (i=0; i < n; i++)
-                fscanf(fp,"%d",&img->val[i]);
-            fclose(fp);
-        }else{
-            fprintf(stderr,"Input image must be P2 or P5\n");
-            exit(-1);
-        }
-    }
-
-    return(img);
-}
-
-void writeGrayImage(GrayImage *img,char *filename)
-{
-    FILE *fp;
-    int i, n, Imax,Imin;
-
-    fp = fopen(filename,"wb");
-    if (fp == NULL){
-        fprintf(stderr,"Cannot open %s\n",filename);
-        exit(-1);
-    }
-    n    = img->ncols*img->nrows;
-    Imax = INT_MIN; Imin = INT_MAX;
-    for (i=0; i < n; i++) {
-
-        if (img->val[i] > Imax)
-            Imax = img->val[i];
-        if (img->val[i] < Imin)
-            Imin = img->val[i];
-    }
-
-
-    fprintf(fp,"P2\n");
-    fprintf(fp,"%d %d\n",img->ncols,img->nrows);
-    fprintf(fp,"%d\n",Imax-Imin);
-
-    for (i=0; i < n; i++) {
-        fprintf(fp,"%d ",img->val[i]-Imin);
-        if (((i+1)%17) == 0)
-            fprintf(fp,"\n");
-    }
-
-    fclose(fp);
-}
-
-
-int minimumValue(GrayImage *img){
-    int i,min;
-
-    min = img->val[0];
-    int n = img->nrows*img->ncols;
-    for (i = 0; i < n; i++){
-        if (img->val[i] < min) {
-            min = img->val[i];
-        }
-    }
-    return min;
-}
-int maximumValue(GrayImage *img){
-    int i,max;
-
-    max = img->val[0];
-    int n = img->nrows*img->ncols;
-    for (i = 0; i < n; i++){
-        if (img->val[i] > max) {
-            max = img->val[i];
-        }
-    }
-    return max;
-}
-
-ColorImage *createColorImage(int nx, int ny)
-{
-    ColorImage *I=(ColorImage *)calloc(1,sizeof(ColorImage));
-    int y;
-
-    I->nx = nx;
-    I->ny = ny;
-    I->dx = 1.0;
-    I->dy = 1.0;
-    sprintf(I->unid,"mm");
-
-    I->cor = (Cor **)calloc(ny,sizeof(Cor *));
-    if (I->cor == NULL)
-        Error(MSG1,"createColorImage");
-    else{
-        for (y=0; y < I->ny; y++){
-            I->cor[y] = (Cor *)calloc(nx,sizeof(Cor));
-            if (I->cor[y] == NULL)
-                Error(MSG1,"createColorImage");
-        }
-    }
-    return(I);
-}
-
-ColorImage *readColorImage(char *filename)
-{
-    FILE *fp=NULL;
-    char type[10];
-    int  x,y,nx,ny,Imax;
-    ColorImage *I=NULL;
-    char remarks[256];
-    ushort rgb16[3];
-
-    fp = fopen(filename,"r");
-    if (fp != NULL) {
-        fscanf(fp,"%s",type);
-        NCFgets(remarks,255,fp);
-
-        if (strcmp(type,"P6")==0){
-            int c = getc(fp);
-            while (c == '#') {
-                while (getc(fp) != '\n');
-                c = getc(fp);
-            }
-            ungetc(c, fp);
-            if (fscanf(fp, "%d %d", &nx, &ny) != 2) {
-                fprintf(stderr, "Invalid image size (error loading '%s')\n", filename);
-                exit(1);
-            }
-
-            I = createColorImage(nx,ny);
-
-            if (fscanf(fp, "%d", &Imax) != 1) {
-                fprintf(stderr, "Invalid rgb component (error loading '%s')\n",
-                        filename);
-                exit(1);
-            }
-
-            I->Imax = Imax;
-            while (fgetc(fp) != '\n');
-
-            if (Imax <= 255){
-                for (y=0; y < ny; y++)
-                    for (x=0; x < nx; x++){
-                        I->cor[y][x].val[RED]=(int)fgetc(fp);//red
-                        I->cor[y][x].val[GREEN]=(int)fgetc(fp);//green
-                        I->cor[y][x].val[BLUE]=(int)fgetc(fp);//blue
-                    }
-            }else if (Imax > 255 && Imax <= 65535){
-                int rgbBitDepth = 9;
-
-                while ((1 << rgbBitDepth) <= Imax) {
-                    rgbBitDepth++;
-                }
-                for (y=0; y < ny; y++) {
-                    for (x=0; x < nx; x++){
-                        if (fread(rgb16, 2, 3, fp) == 3) {
-                            I->cor[y][x].val[RED]=((rgb16[0] & 0xff) << 8) | ((ushort) rgb16[0] >> 8);
-                            I->cor[y][x].val[GREEN]=((rgb16[1] & 0xff) << 8) | ((ushort) rgb16[1] >> 8);
-                            I->cor[y][x].val[BLUE]=((rgb16[2] & 0xff) << 8) | ((ushort) rgb16[2] >> 8);
-                        } else{
-                            Error("Reading 16-bit error","ReadColorImage");
-                        }
-                    }
-                }
-            }
-        }else if(strcmp(type,"P3")==0){
-            int c = getc(fp);
-            while (c == '#') {
-                while (getc(fp) != '\n');
-                c = getc(fp);
-            }
-            ungetc(c, fp);
-            if (fscanf(fp, "%d %d", &nx, &ny) != 2) {
-                fprintf(stderr, "Invalid image size (error loading '%s')\n", filename);
-                exit(1);
-            }
-
-            I = createColorImage(nx,ny);
-
-            if (fscanf(fp, "%d", &Imax) != 1) {
-                fprintf(stderr, "Invalid rgb component (error loading '%s')\n",
-                        filename);
-                exit(1);
-            }
-
-            I->Imax = Imax;
-
-            int R=0,G=0,B=0;
-
-            for (y=0; y < ny; y++) {
-                for (x=0; x < nx; x++){
-                    (void)fscanf(fp, "%d %d %d",&R,&G,&B);
-                    I->cor[y][x].val[0] = R;
-                    I->cor[y][x].val[1] = G;
-                    I->cor[y][x].val[2] = B;
-                }
-            }
-        }
-
-        else{
-            Error("ColorImage type invalid","ReadColormage");
-        }
-
-        fclose(fp);
-    }else{
-        Error(MSG2,"ReadColorImage");
-    }
-
-    return(I);
-}
-
-void writeColorImage(ColorImage *I, char *filename)
-{
-    FILE *fp=NULL;
-    int  x,y;
-    ushort rgb16[3];
-
-    fp = fopen(filename,"w");
-    if (fp != NULL) {
-        fprintf(fp,"P6\n");
-        fprintf(fp,"%d %d\n",I->nx,I->ny);
-
-        int max_val = maximumColorValue(I);
-        int min_val = minimumColorValue(I);
-
-        if (min_val < 0){
-            Error(MSG2,"WriteColorImage");
-            return;
-        }
-
-        if (max_val < 256){
-            fprintf(fp,"255\n");
-            for (y=0; y < I->ny; y++)
-                for (x=0; x < I->nx; x++){
-                    fputc((uchar)I->cor[y][x].val[RED],fp);//red
-                    fputc((uchar)I->cor[y][x].val[GREEN],fp);//green
-                    fputc((uchar)I->cor[y][x].val[BLUE],fp);//blue
-                }
-        } else if (max_val < 65536){
-            int rgbBitDepth = 9;
-            // find the bit depth for the maximum value img_max_val
-            while ((1 << rgbBitDepth) <= max_val) {
-                rgbBitDepth++;
-            }
-
-            fprintf(fp, "%d\n", (1 << rgbBitDepth) - 1);
-            for (y=0; y < I->ny; y++)
-                for (x=0; x < I->nx; x++){
-                    rgb16[RED] = ((I->cor[y][x].val[RED] & 0xff) << 8) | ((ushort) I->cor[y][x].val[RED] >> 8);//I->cor[y][x].val[RED];
-                    rgb16[GREEN] = ((I->cor[y][x].val[GREEN] & 0xff) << 8) | ((ushort) I->cor[y][x].val[GREEN] >> 8);//I->cor[y][x].val[GREEN];
-                    rgb16[BLUE] = ((I->cor[y][x].val[BLUE] & 0xff) << 8) | ((ushort) I->cor[y][x].val[BLUE] >> 8);//I->cor[y][x].val[BLUE];
-                    // write 6 bytes for each image pixel
-                    if (fwrite(rgb16, 2, 3, fp) != 3) {
-                        Error("Cannot write 16-bit image as P6", "iftWriteImageP6");
-                    }
-                }
-        }
-        fclose(fp);
-    }else{
-        Error(MSG2,"WriteColorImage");
-    }
-
-}
-
-void destroyColorImage(ColorImage **I)
-{
-    int y;
-
-    if ((*I) != NULL) {
-        for (y=0; y < (*I)->ny; y++)
-            free((*I)->cor[y]);
-        free((*I)->cor);
-        free(*I);
-        *I = NULL;
-    }
-}
-
-
-int minimumColorValue(ColorImage *img){
-
-    int img_min_val[3];
-    for (int i=0; i<3; i++){
-        img_min_val[i] = minimumIntensityColor(img,i);
-    }
-
-    return MIN(MIN(img_min_val[RED],img_min_val[GREEN]),img_min_val[BLUE]);
-}
-
-int maximumColorValue(ColorImage *img){
-
-    int img_max_val[3];
-    for (int i=0; i<3; i++){
-        img_max_val[i] = maximumIntensityColor(img,i);
-    }
-
-    return MAX(MAX(img_max_val[RED],img_max_val[GREEN]),img_max_val[BLUE]);
-}
-
-
-
-int minimumIntensityColor(ColorImage *img, int c){
-    int i,j,min;
-
-    min = INT_MAX;
-    for (i = 0; i<img->nx; i++)
-        for (j=0; j<img->ny; j++)
-            if (img->cor[j][i].val[c] < min)
-                min = img->cor[j][i].val[c];
-
-    return min;
-}
-
-int maximumIntensityColor(ColorImage *img, int c){
-    int i,j,max;
-
-    max = -1;
-    for (i = 0; i<img->nx; i++)
-        for (j=0; j<img->ny; j++)
-            if (img->cor[j][i].val[c] > max)
-                max = img->cor[j][i].val[c];
-
-    return max;
-}
-
-bool isValidPixelCoordinate(GrayImage *image,int pixelCoordinateX,int pixelCoordinateY){
-    if(pixelCoordinateX < 0 || pixelCoordinateY < 0){
-        return false;
-    }
-    if(pixelCoordinateX >= image->ncols || pixelCoordinateY >= image->ncols){
-        return false;
-    }
-    return true;
-}
-
-bool isValidPixelCoordinate(Image *image,int pixelCoordinateX,int pixelCoordinateY){
-    if(pixelCoordinateX < 0 || pixelCoordinateY < 0){
-        return false;
-    }
-    if(pixelCoordinateX >= image->nx || pixelCoordinateY >= image->ny){
-        return false;
-    }
-    return true;
-}
-
-bool isImagesSameDomain(GrayImage *image1,GrayImage *image2){
-
-    if(image1->nrows == image2->nrows && image1->ncols == image2->ncols){
-        return true;
-    }
-    return false;
-}
-
-bool isImagesSameDomain(Image *image1,Image *image2){
-
-    if(image1->nx == image2->nx && image1->nx == image2->nx){
-        if(image1->nchannels == image2->nchannels){
-            return true;
-        }
-    }
-    return false;
-}
-
-void copyGrayImage(GrayImage *image1,GrayImage **image2){
-    if((*image2) == NULL){
-        *image2 = createGrayImage(image1->ncols,image1->nrows);
-    }
-
-    if(isImagesSameDomain(image1,*image2)){
-        for (int n = 0; n < image1->nrows*image1->ncols; ++n) {
-            (*image2)->val[n] = image1->val[n];
-        }
-    }
-    else{
-        printf("different domains");
-    }
-}
-
-GrayImage *imageSubtraction(GrayImage *image1, GrayImage *image2, bool saturation){
-    GrayImage *outputImage = NULL;
-    if(isImagesSameDomain(image1,image2)){
-        outputImage = createGrayImage(image1->ncols,image1->nrows);
-        int n = image1->ncols*image1->nrows;
-        int result;
-        for (int i = 0; i < n; ++i) {
-            result = image1->val[i] - image2->val[i];
-            if(saturation){
-                result = (result<0)?0:result;
-            }
-            outputImage->val[i] = result;
-        }
-    }
-    return outputImage;
-}
-
-
-
-int sumUpAllPixelsValues(GrayImage *image){
-    int sum = 0;
-    for (int n = 0; n < image->nrows*image->ncols; ++n) {
-        sum += image->val[n];
-    }
-    return sum;
-}
-
-
-void writeImageAsASCII(GrayImage* image,const char *filename,unsigned int maxValueOnChanel){
-    int i, j;
-    FILE *fp = fopen(filename, "w");
-    (void) fprintf(fp, "P2\n%d %d\n%d\n", image->ncols,image->nrows, (int) maxValueOnChanel);
-    int k = 0;
-    for (i = 0; i < image->nrows; i++){
-        for (j = 0; j < image->ncols; j++){
-            (void) fprintf(fp,"%d ",image->val[k]);
-            k++;
-        }
-        (void) fprintf(fp,"\n");
-    }
-    (void) fclose(fp);
-}
-
-void writeImageAsASCII(ColorImage* image,const char *filename, unsigned int maxValueOnChanel){
-    int i, j;
-    FILE *fp = fopen(filename, "w");
-    (void) fprintf(fp, "P3\n%d %d\n%d\n", image->nx,image->ny, (int) maxValueOnChanel);
-    for (i = 0; i < image->ny; i++){
-        for (j = 0; j < image->nx; j++){
-            (void) fprintf(fp,"%d %d %d ",image->cor[i][j].val[0],image->cor[i][j].val[1],image->cor[i][j].val[2]);
-        }
-        (void) fprintf(fp,"\n");
-    }
-    (void) fclose(fp);
-}
-
-void writeImageAsBinary(GrayImage* image,const char *filename,unsigned int maxValueOnChanel){
-    int i, j;
-    FILE *fp = fopen(filename, "wb");
-    (void) fprintf(fp, "P5\n%d %d\n%d\n", image->ncols,image->nrows, (int) maxValueOnChanel);
-    int k = 0;
-    for (i = 0; i < image->nrows; i++){
-        for (j = 0; j < image->ncols; j++){
-            static unsigned char gray[1];
-            gray[0] = image->val[k];
-            (void) fwrite(gray, 1, 1, fp);
-            k++;
-        }
-        //(void) fprintf(fp,"\n");
-    }
-    (void) fclose(fp);
-}
-
-void writeImageAsBinary(ColorImage* image,const char *filename, unsigned int maxValueOnChanel){
-    int i, j;
-    FILE *fp = fopen(filename, "wb");
-    (void) fprintf(fp, "P6\n%d %d\n%d\n", image->nx,image->ny, (int) maxValueOnChanel);
-    for (i = 0; i < image->ny; i++){
-        for (j = 0; j < image->nx; j++){
-            static unsigned char color[3];
-            color[0] = image->cor[i][j].val[0];
-            color[1] = image->cor[i][j].val[1];
-            color[2] = image->cor[i][j].val[2];
-            (void) fwrite(color, 1, 3, fp);
-        }
-        //(void) fprintf(fp,"\n");
-    }
-    (void) fclose(fp);
-}
-
-void writeImage(ColorImage* image,const char *filename, const char *magicNumber,unsigned int maxValueOnChanel){
-    //ASCII
-    if (strcmp(magicNumber,"P3")==0){
-        writeImageAsASCII(image,filename,maxValueOnChanel);
-    }//Binary
-    else if(strcmp(magicNumber,"P6")==0){
-        writeImageAsBinary(image,filename,maxValueOnChanel);
-    }else{
-        fprintf(stderr,"magic number desconhecido. Por favor, acesse https://en.wikipedia.org/wiki/Netpbm_format "
-                "para saber mais sobre");
-    }
-}
-
-void writeImage(GrayImage* image,const char *filename, const char *magicNumber,unsigned int maxValueOnChanel){
-    //ASCII
-    if (strcmp(magicNumber,"P2")==0){
-        writeImageAsASCII(image,filename,maxValueOnChanel);
-    }//Binary
-    else if(strcmp(magicNumber,"P5")==0){
-        writeImageAsBinary(image,filename,maxValueOnChanel);
-    }else{
-        fprintf(stderr,"magic number desconhecido. Por favor, acesse https://en.wikipedia.org/wiki/Netpbm_format "
-                "para saber mais sobre");
-    }
-}
-
-void writeImage(GrayImage* image,const char *filename){
-    writeImage(image,filename, "P5",255);
-}
-
-void writeImage(ColorImage* image,const char *filename){
-    writeImage(image,filename, "P6",255);
-}
-
-ColorImage *RGBtoYCbCr(ColorImage *rgb)
-{
-    ColorImage *ycbcr;
-    float a = 16.0;
-    float b = 128.0;
-
-    ycbcr = createColorImage(rgb->nx,rgb->ny);
-
-    for (int y=0; y < rgb->ny; y++)
-        for (int x=0; x < rgb->nx; x++){
-            float lum  = (0.257*(float)rgb->cor[y][x].val[0]+
-                          0.504*(float)rgb->cor[y][x].val[1]+
-                          0.098*(float)rgb->cor[y][x].val[2]+a);
-            float Cb = (-0.148*(float)rgb->cor[y][x].val[0]+
-                        -0.291*(float)rgb->cor[y][x].val[1]+
-                        0.439*(float)rgb->cor[y][x].val[2]+b);
-            float Cr = (0.439*(float)rgb->cor[y][x].val[0]+
-                        -0.368*(float)rgb->cor[y][x].val[1]+
-                        -0.071*(float)rgb->cor[y][x].val[2]+b);
-
-            if (lum < 0)   lum = 0.0;
-            if (lum > 255) lum = 255;
-            if (Cb < 0)   Cb = 0.0;
-            if (Cb > 255) Cb = 255;
-            if (Cr < 0)   Cr = 0.0;
-            if (Cr > 255) Cr = 255;
-
-            ycbcr->cor[y][x].val[0] = lum;
-            ycbcr->cor[y][x].val[1] = Cb;
-            ycbcr->cor[y][x].val[2] = Cr;
-
-        }
-
-    return(ycbcr);
-}
-
-GrayImage* extractColorChannelAsGrayImage(ColorImage* colorImage,int channel){
-    GrayImage* grayImage= createGrayImage(colorImage->nx,colorImage->ny);
-    int k=0;
-    for (int i = 0; i < colorImage->ny; ++i) {
-        for (int j = 0; j < colorImage->nx; ++j) {
-            grayImage->val[k] = colorImage->cor[i][j].val[channel];
-            k++;
-        }
-    }
-    return grayImage;
-}
 
 Image* createImage(int nx, int ny,int nchannels){
     Image* image = (Image*)calloc(1,sizeof(Image));
@@ -643,7 +22,7 @@ Image* createImage(int nx, int ny,int nchannels){
     image->unid[1] = 'm';
     image->channel = (float**)calloc(nchannels,sizeof(float*));
     image->nchannels = nchannels;
-    image->colorSpace = UNKNOWN;
+    findAppropriateColorSpace(image);
     image->dataTypeId = FLOAT;
     for (int i = 0; i < image->nchannels; ++i) {
         image->channel[i] = (float*)calloc(image->numberPixels,sizeof(float));
@@ -668,7 +47,7 @@ Image* createImage(int nx, int ny,int nz, int nchannels){
     image->unid[1] = 'm';
     image->channel = (float**)calloc(nchannels,sizeof(float*));
     image->nchannels = nchannels;
-    image->colorSpace = UNKNOWN;
+    findAppropriateColorSpace(image);
     image->dataTypeId = FLOAT;
     for (int i = 0; i < image->nchannels; ++i) {
         image->channel[i] = (float*)calloc(image->numberPixels,sizeof(float));
@@ -677,8 +56,6 @@ Image* createImage(int nx, int ny,int nz, int nchannels){
     }
     return image;
 }
-
-
 
 Image* createImage(int nx, int ny){
     Image* image = (Image*)calloc(1,sizeof(Image));
@@ -693,7 +70,7 @@ Image* createImage(int nx, int ny){
     image->unid[1] = 'm';
     image->channel = (float**)calloc(1,sizeof(float*));
     image->nchannels = 1;
-    image->colorSpace = UNKNOWN;
+    image->colorSpace = GRAYSCALE;
     image->dataTypeId = FLOAT;
     for (int i = 0; i < image->nchannels; ++i) {
         image->channel[i] = (float*)calloc(image->numberPixels,sizeof(float*));
@@ -701,16 +78,36 @@ Image* createImage(int nx, int ny){
     return image;
 }
 
+void findAppropriateColorSpace(Image* image){
+    if (image->nchannels == 1){
+        image->colorSpace = GRAYSCALE;
+    }else if(image->nchannels == 3){
+        image->colorSpace = RGB;
+    }else if(image->nchannels == 4){
+        image->colorSpace = RGBA;
+    }else{
+        image->colorSpace = UNKNOWN;
+    }
+}
+
+
 void destroyImage(Image**image ){
-    Image* auxPointer = *image;
-    if(auxPointer == NULL){
+    if((*image) == NULL){
         return;
     }
-    for (int i = 0; i < auxPointer->nchannels; i++) {
-        free(auxPointer->channel[i]);
+    for (int i = 0; i < (*image)->nchannels; ++i) {
+        free((*image)->channel[i]);
     }
-    free(auxPointer);
-    auxPointer = NULL;
+
+    free((*image)->channel);
+    free((*image));
+    (*image) = NULL;
+}
+
+void destroyImageVoidPointer(void* data){
+    Image** aux = ((Image**)data);
+    destroyImage(aux);
+    *aux = NULL;
 }
 
 Image* readImage(char *filename){
@@ -725,6 +122,10 @@ Image* readImage(char *filename){
         image = readImagePPM(filename);
     }else if(strcmp(ext,"png")==0){
         image = readImagePNG(filename);
+    }else if( (strcmp(ext,"jpg")==0) || (strcmp(ext,"jpeg")==0) ){
+        image = readImageJPEG(filename);
+    }else if( (strcmp(ext,"tif")==0) || (strcmp(ext,"TIF")==0)){
+        image = readImageTIFF(filename);
     }
     else{
         printf("image format unknown\n");
@@ -770,8 +171,7 @@ Image *readImagePGM(char *filename)
         fclose(fp);
         img = createImage(ncols,nrows,1);
         img->scalingFactor = maxValue;
-        double log2 = 0.30102999566;
-        img->channelDepth = (log(maxValue+1)/log2)+0.4;
+        img->channelDepth = (log(maxValue+1)/log(2))+0.1;
         img->colorSpace = GRAYSCALE;
         for (int i=0; i < n; i++)
             img->channel[0][i]=(float)value[i];
@@ -790,8 +190,7 @@ Image *readImagePGM(char *filename)
             sscanf(z,"%d\n",&maxValue);
             img = createImage(ncols,nrows,1);
             img->scalingFactor = maxValue;
-            double log2 = 0.30102999566;
-            img->channelDepth = (log(maxValue+1)/log2)+0.4;
+            img->channelDepth = (log(maxValue+1)/log(1))+0.1;
             img->colorSpace = GRAYSCALE;
 
             for (int i=0; i < n; i++)
@@ -839,8 +238,7 @@ Image *readImagePPM(char *filename){
             }
 
             I->scalingFactor = Imax;
-            double log2 = 0.30102999566;
-            I->channelDepth = (log(Imax+1)/log2)+0.4;
+            I->channelDepth = (log(Imax+1)/log(2))+0.1;
             I->colorSpace = RGB;
             while (fgetc(fp) != '\n');
 
@@ -892,8 +290,8 @@ Image *readImagePPM(char *filename){
             }
 
             I->scalingFactor = Imax;
-            double log2 = 0.30102999566;
-            I->channelDepth = (log(Imax+1)/log2)+0.4;
+            I->channelDepth = (log(Imax+1)/log(2))+0.1;
+
             int R=0,G=0,B=0;
             int iter=0;
             for (y=0; y < ny; y++) {
@@ -920,6 +318,49 @@ Image *readImagePPM(char *filename){
 
 }
 
+//TODO: suppport to 8-bit channel image
+Image *readImageTIFF(char *filename){
+    printf("Support to tiff images is unenabled\n");
+    return NULL;
+    // TIFF *tif=TIFFOpen(filename, "r");
+    // uint32 width;
+    // uint32 height;
+    // uint32 npixels;
+    // TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
+    // TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
+
+    // npixels = width*height;
+    // uint32 * raster=(uint32 *) _TIFFmalloc(npixels *sizeof(uint32));
+    // int numberOfChannels = 4;
+
+    // int status = TIFFReadRGBAImage(tif, width, height, raster, 0);
+    // if(status==0){
+    //     printf("[readImageTIFF] An error occured when reading image %s\n",filename);
+    //     return NULL;
+    // }
+
+    // Image* image = createImage(width,height,numberOfChannels);
+    // int k = 0;
+    // for (int y = height-1; y >=0 ; --y) {
+    //     for (int x = 0; x < ((int)width); ++x) {
+    //         //printf("%u %u\n",x,y);
+    //         int A = raster[k] >> 24;
+    //         int B = (raster[k] >> 16) & 0x0000FF;
+    //         int G = (raster[k] >> 8) & 0x0000FF;
+    //         int R =  (raster[k]) & 0x0000FF;
+    //         //printf("%d %d %d %d\n",R,G,B,A);
+    //         imageValCh(image,x,y,0) = R;
+    //         imageValCh(image,x,y,1) = G;
+    //         imageValCh(image,x,y,2) = B;
+    //         imageValCh(image,x,y,3) = A;
+    //         k++;
+    //     }
+    // }
+
+    // _TIFFfree(raster);
+    // TIFFClose(tif);
+    // return image;
+}
 
 Image *readImagePNG(char *filename){
 /*
@@ -931,11 +372,12 @@ Image *readImagePNG(char *filename){
  */
     Image* image = NULL;
     int width, height;
-    //png_byte color_type;
+    png_byte color_type;
     png_byte bit_depth;
 
     png_structp png_ptr;
     png_infop info_ptr;
+
     //int number_of_passes;
     png_bytep * row_pointers;
     char header[8];    // 8 is the maximum size that can be checked
@@ -998,75 +440,48 @@ Image *readImagePNG(char *filename){
     }
     png_read_image(png_ptr, row_pointers);
 
+
     fclose(fp);
 
-    if (png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_RGB){
-        image = createImage(width,height,3);
-        image->scalingFactor = pow(2,bit_depth)-1;
-        image->channelDepth = bit_depth;
-        image->colorSpace = RGB;
-        for (int y=0; y<height; y++) {
-            png_byte* row = row_pointers[y];
-            for (int x=0; x<width; x++) {
-                png_byte* ptr = &(row[x*3]);
-
-                imageValCh(image,x,y,0) = ptr[0];
-                imageValCh(image,x,y,1) = ptr[1];
-                imageValCh(image,x,y,2) = ptr[2];
-            }
-        }
-
-    }else if(png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_RGB_ALPHA){
-        image = createImage(width,height,4);
-        image->scalingFactor = pow(2,bit_depth)-1;
-        image->channelDepth = bit_depth;
-        image->colorSpace = RGBA;
-        for (int y=0; y<height; y++) {
-            png_byte* row = row_pointers[y];
-            for (int x=0; x<width; x++) {
-                png_byte* ptr = &(row[x*4]);
-                imageValCh(image,x,y,0) = ptr[0];
-                imageValCh(image,x,y,1) = ptr[1];
-                imageValCh(image,x,y,2) = ptr[2];
-                imageValCh(image,x,y,3) = ptr[3];
-            }
-        }
-    }else if(png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_GRAY){
-        image = createImage(width,height,1);
-        image->scalingFactor = pow(2,bit_depth)-1;
-        image->channelDepth = bit_depth;
-        image->colorSpace = GRAYSCALE;
-        for (int y=0; y<height; y++) {
-            png_byte* row = row_pointers[y];
-            for (int x=0; x<width; x++) {
-                png_byte* ptr = &(row[x*1]);
-                imageValCh(image,x,y,0) = ptr[0];
-            }
-        }
-    }else if(png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_GRAY_ALPHA){
-        image = createImage(width,height,2);
-        image->scalingFactor = pow(2,bit_depth)-1;
-        image->channelDepth = bit_depth;
-        image->colorSpace = GRAYSCALE_ALPHA;
-        for (int y=0; y<height; y++) {
-            png_byte* row = row_pointers[y];
-            for (int x=0; x<width; x++) {
-                png_byte* ptr = &(row[x*2]);
-                imageValCh(image,x,y,0) = ptr[0];
-                imageValCh(image,x,y,1) = ptr[1];
-            }
-        }
-    }else if(png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_PALETTE){
-        printf("PNG_COLOR_TYPE_PALETTE is not implemented yet\n");
+    ColorSpace colorSpace;
+    unsigned int numberChannels = png_get_channels(png_ptr, info_ptr);
+    color_type = png_get_color_type(png_ptr, info_ptr);
+    if (color_type == PNG_COLOR_TYPE_GRAY){
+        colorSpace = GRAYSCALE;
+    }else if(color_type == PNG_COLOR_TYPE_GRAY_ALPHA){
+        colorSpace = GRAYSCALE_ALPHA;
+    }else if(color_type == PNG_COLOR_TYPE_RGB){
+        colorSpace = RGB;
+    }else if(color_type == PNG_COLOR_TYPE_RGB_ALPHA){
+        colorSpace = RGBA;
+    }else if(color_type == PNG_COLOR_TYPE_PALETTE){
+        printf("[readImagePNG] PNG_COLOR_TYPE_PALETTE is not implemented yet\n");
+        colorSpace = UNKNOWN;
     }else{
-        printf("PNG_COLOR_TYPE_ unknown\n");
+        printf("[readImagePNG] PNG_COLOR_TYPE_ unknown\n");
+        colorSpace = UNKNOWN;
     }
+    image = createImage(width,height,numberChannels);
+    image->scalingFactor = pow(2,bit_depth)-1;
+    image->channelDepth = bit_depth;
+    image->colorSpace = colorSpace;
+    for (int y=0; y<height; y++) {
+        png_byte* row = row_pointers[y];
+        for (int x=0; x<width; x++) {
+            png_byte* ptr = &(row[x*numberChannels]);
+            for (unsigned int c = 0; c < numberChannels; ++c) {
+                imageValCh(image,x,y,c) = ptr[c];
+            }
+        }
+    }
+
     for (int y=0; y<height; y++) {
         free(row_pointers[y]);
     }
     free(row_pointers);
-    return image;
+    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
+    return image;
 }
 
 Image *readImageJPEG(char *filename){
@@ -1157,9 +572,10 @@ Image *readImageJPEG(char *filename){
     /* Here we use the library's state variable cinfo.output_scanline as the
      * loop counter, so that we don't have to keep track ourselves.
      */
-    image = createImage(cinfo.image_width,cinfo.image_height,cinfo.num_components);
+    image = createImage(cinfo.output_width,cinfo.output_height,cinfo.output_components);
     image->channelDepth = cinfo.data_precision;
     image->scalingFactor = pow(2,image->channelDepth)-1;
+
 
     //printf("%d %d\n",cinfo.jpeg_color_space, cinfo.out_color_space);
 
@@ -1222,7 +638,54 @@ Image *readImageJPEG(char *filename){
 
 }
 
+//TODO: suppport to 16-bit channel image
+void writeImageTIFF(Image *image,char *filename){
+    printf("Support to tiff images is unenabled\n");
+    return;
+//     TIFF *out= TIFFOpen(filename, "w");
+//     int sampleperpixel = image->nchannels;    // or 3 if there is no alpha channel, you should get a understanding of alpha in class soon.
+
+//     TIFFSetField (out, TIFFTAG_IMAGEWIDTH, image->nx);  // set the width of the image
+//     TIFFSetField(out, TIFFTAG_IMAGELENGTH, image->ny);    // set the height of the image
+//     TIFFSetField(out, TIFFTAG_SAMPLESPERPIXEL, sampleperpixel);   // set number of channels per pixel
+//     TIFFSetField(out, TIFFTAG_BITSPERSAMPLE, 8);    // set the size of the channels
+//     TIFFSetField(out, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);    // set the origin of the image.
+// //   Some other essential fields to set that you do not have to understand for now.
+//     TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+//     TIFFSetField(out, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+
+//     tsize_t linebytes = sampleperpixel * image->nx;     // length in memory of one row of pixel in the image.
+//     unsigned char *buf = NULL;        // buffer used to store the row of pixel information for writing to file
+// //    Allocating memory to store the pixels of current row
+//     buf =(unsigned char *)_TIFFmalloc(linebytes);
+//     // We set the strip size of the file to be size of one row of pixels
+//     TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(out, image->nx*sampleperpixel));
+
+//     //Now writing image to the file one strip at a time
+//     int k=0;
+//     for (uint32 row = 0; row < (unsigned long)image->ny; row++)
+//     {
+//         k=0;
+//         for (uint32 col = 0; col < (unsigned long)image->nx; ++col) {
+
+//             for (int c = 0; c < sampleperpixel; ++c) {
+//                 buf[k] = (unsigned char)imageValCh(image,col,row,c);
+//                 k++;
+//             }
+
+//         }
+//         //memcpy(buf, &image[(image->ny-row-1)*linebytes], linebytes);    // check the index here, and figure out why not using h*linebytes
+//         if (TIFFWriteScanline(out, buf, row, 0) < 0){
+//             break;
+//         }
+//     }
+//     (void) TIFFClose(out);
+//     if (buf)
+//         _TIFFfree(buf);
+}
+
 void writeImageJPEG(Image *image,char *filename){
+    //code from jpeg-9b/example.c
     /* This struct contains the JPEG compression parameters and pointers to
  * working space (which is allocated as needed by the JPEG library).
  * It is possible to have several such structures, representing multiple
@@ -1244,7 +707,7 @@ void writeImageJPEG(Image *image,char *filename){
     /* More stuff */
     FILE * outfile;		/* target file */
     JSAMPARRAY buffer;
-        /* Step 1: allocate and initialize JPEG compression object */
+    /* Step 1: allocate and initialize JPEG compression object */
 
     /* We have to set up the error handler first, in case the initialization
      * step fails.  (Unlikely, but it could happen if you are out of memory.)
@@ -1253,7 +716,7 @@ void writeImageJPEG(Image *image,char *filename){
      */
     cinfo.err = jpeg_std_error(&jerr);
 
-        /* Now we can initialize the JPEG compression object. */
+    /* Now we can initialize the JPEG compression object. */
     jpeg_create_compress(&cinfo);
     /* Step 2: specify data destination (eg, a file) */
     /* Note: steps 2 and 3 can be done in either order. */
@@ -1269,11 +732,12 @@ void writeImageJPEG(Image *image,char *filename){
     }
     jpeg_stdio_dest(&cinfo, outfile);
 
-        /* First we supply a description of the input image.
- * Four fields of the cinfo struct must be filled in:
- */
+    /* First we supply a description of the input image.
+* Four fields of the cinfo struct must be filled in:
+*/
     cinfo.image_width = image->nx; 	/* image width and height, in pixels */
     cinfo.image_height = image->ny;
+    cinfo.data_precision = image->channelDepth;
 
     if(image->colorSpace == RGB || image->colorSpace == RGBA){
         cinfo.input_components = 3;
@@ -1301,15 +765,15 @@ void writeImageJPEG(Image *image,char *filename){
         cinfo.jpeg_color_space = JCS_UNKNOWN;
     }
 
-        /* Now use the library's routine to set default compression parameters.
- * (You must set at least cinfo.in_color_space before calling this,
- * since the defaults depend on the source color space.)
- */
+    /* Now use the library's routine to set default compression parameters.
+* (You must set at least cinfo.in_color_space before calling this,
+* since the defaults depend on the source color space.)
+*/
     jpeg_set_defaults(&cinfo);
 
-        /* Now you can set any non-default parameters you wish to.
- * Here we just illustrate the use of quality (quantization table) scaling:
- */
+    /* Now you can set any non-default parameters you wish to.
+* Here we just illustrate the use of quality (quantization table) scaling:
+*/
     int quality = 100;
     jpeg_set_quality(&cinfo, quality, TRUE /* limit to baseline-JPEG values */);
 
@@ -1368,7 +832,6 @@ void writeImagePNG(Image *image,char *filename){
  * of the X11 license.
  *
  */
-
     /* create file */
     FILE *fp = fopen(filename, "wb");
     if (!fp){
@@ -1400,11 +863,11 @@ void writeImagePNG(Image *image,char *filename){
     if (setjmp(png_jmpbuf(png_ptr))){
         printf("[write_png_file] Error during writing header\n");
     }
-    int width, height;
+    png_uint_32 width, height;
     width = image->nx;
     height = image->ny;
     png_byte bit_depth = image->channelDepth;
-    png_byte color_type = -1;
+    png_byte color_type;
     if(image->colorSpace == RGB) {
         color_type = PNG_COLOR_TYPE_RGB;
     } else if(image->colorSpace == RGBA) {
@@ -1426,7 +889,8 @@ void writeImagePNG(Image *image,char *filename){
         else if(image->nchannels == 4){
             color_type = PNG_COLOR_TYPE_RGB_ALPHA;
         }else{
-            printf("[writeImagePNG] unknown color space\n");
+            printf("[writeImagePNG] invalide color space: %d\n",image->colorSpace);
+            return;
         }
     }
 
@@ -1444,54 +908,21 @@ void writeImagePNG(Image *image,char *filename){
 
     png_bytep * row_pointers;
     row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * height);
-    for (int y=0; y<height; y++) {
+    for (size_t y=0; y<height; y++) {
         row_pointers[y] = (png_byte *) malloc(png_get_rowbytes(png_ptr, info_ptr));
     }
 
-    if(image->colorSpace == RGB) {
-        for (int y=0; y<height; y++) {
-            png_byte* row = row_pointers[y];
-            for (int x=0; x<width; x++) {
-                png_byte* ptr = &(row[x*3]);
-                ptr[0]  = (png_byte)(imageValCh(image,x,y,0));
-                ptr[1] =  (png_byte)(imageValCh(image,x,y,1));
-                ptr[2] =  (png_byte)(imageValCh(image,x,y,2));
+    for (size_t y=0; y<height; y++) {
+        png_byte* row = row_pointers[y];
+        for (size_t x=0; x<width; x++) {
+            png_byte* ptr = &(row[x*image->nchannels]);
+            for (int c = 0; c < image->nchannels; ++c) {
+                ptr[c] = (png_byte)(imageValCh(image,x,y,c));
             }
         }
-    } else if(image->colorSpace == RGBA) {
-        for (int y=0; y<height; y++) {
-            png_byte* row = row_pointers[y];
-            for (int x=0; x<width; x++) {
-                png_byte* ptr = &(row[x*4]);
-                ptr[0]  = (png_byte)(imageValCh(image,x,y,0));
-                ptr[1] =  (png_byte)(imageValCh(image,x,y,1));
-                ptr[2] =  (png_byte)(imageValCh(image,x,y,2));
-                ptr[3] =  (png_byte)(imageValCh(image,x,y,3));
-            }
-        }
-    }else if(image->colorSpace == GRAYSCALE){
-        for (int y=0; y<height; y++) {
-            png_byte* row = row_pointers[y];
-            for (int x=0; x<width; x++) {
-                png_byte* ptr = &(row[x*1]);
-                ptr[0]  = (png_byte)(imageValCh(image,x,y,0));
-            }
-        }
-    }else if(image->colorSpace == GRAYSCALE_ALPHA){
-        for (int y=0; y<height; y++) {
-            png_byte* row = row_pointers[y];
-            for (int x=0; x<width; x++) {
-                png_byte* ptr = &(row[x*2]);
-                ptr[0]  = (png_byte)(imageValCh(image,x,y,0));
-                ptr[1]  = (png_byte)(imageValCh(image,x,y,1));
-            }
-        }
-    }else{
-        printf("unknown color type\n");
     }
 
     png_write_image(png_ptr, row_pointers);
-
 
     /* end write */
     if (setjmp(png_jmpbuf(png_ptr))){
@@ -1501,12 +932,13 @@ void writeImagePNG(Image *image,char *filename){
     png_write_end(png_ptr, NULL);
 
     /* cleanup heap allocation */
-    for (int y=0; y<height; y++){
+    for (size_t y=0; y<height; y++){
         free(row_pointers[y]);
     }
     free(row_pointers);
 
     fclose(fp);
+    png_destroy_write_struct(&png_ptr,&info_ptr);
 }
 
 void writeImagePGM(Image *image,char *filename, char *magicNumber){
@@ -1560,30 +992,18 @@ void writeImageP3(Image *image,char *filename){
     (void) fprintf(fp, "P3\n%d %d\n%d\n", image->nx,image->ny, image->scalingFactor);
     int k=0;
 
-    if(image->dataTypeId == FLOAT){
-        float* channel0 = (float*)image->channel[0];
-        float* channel1 = (float*)image->channel[1];
-        float* channel2 = (float*)image->channel[2];
-        for (i = 0; i < image->ny; i++){
-            for (j = 0; j < image->nx; j++){
-                (void) fprintf(fp,"%d %d %d ", (int)(channel0[k]),(int)channel1[k],(int)channel2[k]);
-                k++;
-            }
-            (void) fprintf(fp,"\n");
+    float* channel0 = image->channel[0];
+    float* channel1 = image->channel[1];
+    float* channel2 = image->channel[2];
+    for (i = 0; i < image->ny; i++){
+        for (j = 0; j < image->nx; j++){
+            (void) fprintf(fp,"%d %d %d ", (int)(channel0[k]),(int)channel1[k],(int)channel2[k]);
+            k++;
         }
+        (void) fprintf(fp,"\n");
     }
-    if(image->dataTypeId == DOUBLE){
-        double* channel0 = (double*)image->channel[0];
-        double* channel1 = (double*)image->channel[1];
-        double* channel2 = (double*)image->channel[2];
-        for (i = 0; i < image->ny; i++){
-            for (j = 0; j < image->nx; j++){
-                (void) fprintf(fp,"%d %d %d ", (int)(channel0[k]),(int)channel1[k],(int)channel2[k]);
-                k++;
-            }
-            (void) fprintf(fp,"\n");
-        }
-    }
+
+
     (void) fclose(fp);
 
 }
@@ -1688,70 +1108,6 @@ Image *convertRGBtoYCbCr(Image *rgbImage)
     return(ycbcrImage);
 }
 
-GrayImage* convertImage2GrayImage(Image* image){
-    GrayImage* grayImage = createGrayImage(image->nx,image->ny);
-    for (int k = 0; k < image->numberPixels; ++k) {
-        grayImage->val[k] = image->channel[0][k];
-    }
-    return grayImage;
-}
-
-Image* convertGrayImage2Image(GrayImage* grayImage){
-    Image* image = createImage(grayImage->ncols,grayImage->nrows,1);
-    int maxValue = maximumValue(grayImage);
-    if(maxValue < 256){
-        image->scalingFactor = 255;
-    }else{
-        int value = 256;
-        while(value-1 < maxValue){
-            value = value << 1;
-        }
-        image->scalingFactor = value-1;
-    }
-
-    for (int k = 0; k < image->numberPixels; ++k) {
-        image->channel[0][k] = grayImage->val[k];
-    }
-    return image;
-}
-
-ColorImage* convertImage2ColorImage(Image* image){
-    ColorImage* colorImage = createColorImage(image->nx,image->ny);
-    int k = 0;
-    for (int y = 0; y < colorImage->ny; ++y) {
-        for (int x = 0; x < colorImage->nx; ++x) {
-            colorImage->cor[y][x].val[0] = image->channel[0][k];
-            colorImage->cor[y][x].val[1] = image->channel[1][k];
-            colorImage->cor[y][x].val[2] = image->channel[2][k];
-            k++;
-        }
-    }
-    return colorImage;
-}
-
-Image* convertColorImage2Image(ColorImage* colorImage){
-    Image* image = createImage(colorImage->nx,colorImage->ny,3);
-    int k = 0;
-    int maxValue = maximumColorValue(colorImage);
-    if(maxValue < 256){
-        image->scalingFactor = 255;
-    }else{
-        int value = 256;
-        while(value-1 < maxValue){
-            value = value << 1;
-        }
-        image->scalingFactor = value-1;
-    }
-    for (int y = 0; y < colorImage->ny; ++y) {
-        for (int x = 0; x < colorImage->nx; ++x) {
-            image->channel[0][k] = colorImage->cor[y][x].val[0];
-            image->channel[1][k] = colorImage->cor[y][x].val[1];
-            image->channel[2][k] = colorImage->cor[y][x].val[2];
-            k++;
-        }
-    }
-    return image;
-}
 
 float sumUpAllPixelsValues(Image *image, bool normalize){
     double sum = 0;
@@ -1901,6 +1257,17 @@ Image *imageSubtraction(Image *image1, Image *image2, bool saturation){
     return outputImage;
 }
 
+bool isImagesSameDomain(Image* image1, Image* image2){
+    if(image1->nx == image2->nx){
+        if(image1->ny == image2->ny){
+            if(image1->nz == image2->nz){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 Image* packImagesFromDirectory(DirectoryManager* directoryManager){
     Image* imagePack = NULL;
     Image* currentImage = NULL;
@@ -2027,4 +1394,35 @@ Image* extractSubImage(Image*image, int xCoord,int yCoord, int xsize, int ysize,
         }
     }
     return subImage;
+}
+
+bool isValidPixelCoordinate(Image *image,int pixelCoordinateX,int pixelCoordinateY){
+    if(pixelCoordinateX < 0 || pixelCoordinateY < 0){
+        return false;
+    }
+    if(pixelCoordinateX >= image->nx || pixelCoordinateY >= image->ny){
+        return false;
+    }
+    return true;
+}
+
+void putSlice(Image* volume, Image* image, int sliceIndex){
+    if( (volume->nx != image->nx) || (volume->ny != image->ny)){
+        printf("[putSlice] images dimension mismatch\n");
+    }
+
+    if( (volume->nchannels != image->nchannels)){
+        printf("[putSlice] number of channels mismatch\n");
+    }
+
+    if(sliceIndex < 0 || sliceIndex >= volume->nz){
+        printf("[putSlice] invalid sliceIndex\n");
+    }
+    for (int y = 0; y < image->ny; ++y) {
+        for (int x = 0; x < image->nx; ++x) {
+            for (int c = 0; c < volume->nchannels; ++c) {
+                imageVolumeCh(volume,x,y,sliceIndex,c) = imageValCh(image,x,y,c);
+            }
+        }
+    }
 }

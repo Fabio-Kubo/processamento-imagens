@@ -16,13 +16,6 @@
 #include "adjacencyRelation.h"
 #include "featureVector.h"
 
-GrayImage *dilate(GrayImage *image, AdjacencyRelation *AdjRel);
-GrayImage *erode(GrayImage *image, AdjacencyRelation *AdjRel);
-GrayImage *close(GrayImage *image, AdjacencyRelation *AdjRel);
-GrayImage *open(GrayImage *image, AdjacencyRelation *AdjRel);
-GrayImage *topHat(GrayImage *image,AdjacencyRelation *AdjRel);
-GrayImage *bottomHat(GrayImage *image,AdjacencyRelation *AdjRel);
-GrayImage *morphologicGradient(GrayImage *image,AdjacencyRelation *AdjRel);
 
 Image *dilate(Image *image, AdjacencyRelation *AdjRel);
 Image *erode(Image *image, AdjacencyRelation *AdjRel);
@@ -51,17 +44,6 @@ AdjacencyRelation* transformImage2AdjacencyRelation(Image *image, float threshol
 /*usa o elemento estruturante de adjacencyRelation1 para dilatar o elemento estruturante em adjacencyRelation2
  * */
 AdjacencyRelation* dilate(AdjacencyRelation *adjacencyRelation1, AdjacencyRelation *adjacencyRelation2);
-/*computa os pattern spectrums (https://en.wikipedia.org/wiki/Granulometry_(morphology))
- * e gera uma feature para cada um deles. O elemento estruturante usado tem formato de circulo
- * */
-float *applyGranulometryOnImage(GrayImage *image, float startRadius, float endRadius);
-/*computa os pattern spectrums (https://en.wikipedia.org/wiki/Granulometry_(morphology))
- * e gera uma feature para cada um deles. O elemento estruturante usado tem formato de losango
- * */
-FeatureVector *applyGranulometryOnImage(GrayImage *image, int k);
-FeatureVector *applyGranulometryOnImage(ColorImage *image, int k);
-FeatureVector *getMorphologicalPdf(GrayImage *image, int k);
-FeatureVector *getMorphologicalPdf(ColorImage *image, int k);
 
 
 FeatureVector *getMorphologicalPdf(Image *image, AdjacencyRelation* adjacencyRelation, int k_times);

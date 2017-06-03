@@ -23,11 +23,9 @@
 //
 
 
-#ifndef LIBFL_GIF_H_
-#define LIBFL_GIF_H_H
+#ifndef _GIF_H_
+#define _GIF_H_
 
-#ifndef gif_h
-#define gif_h
 
 //#include <stdio.h>   // for FILE*
 #include <string.h>  // for memcpy and bzero
@@ -184,7 +182,7 @@ bool GifWriteFrame( GifWriter* writer, const uint8_t* image, uint32_t width, uin
 bool GifEnd( GifWriter* writer );
 
 
-#endif
 
 
-#endif //LIBFL_GIF_H_H
+
+#endif //_GIF_H_H

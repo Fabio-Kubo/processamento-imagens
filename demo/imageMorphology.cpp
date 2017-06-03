@@ -3,8 +3,8 @@
 int main(int argc, char **argv) {
 
     AdjacencyRelation *adjRel = NULL;
-    GrayImage *grayImage = NULL;
-    GrayImage *outputImage = NULL;
+    Image *grayImage = NULL;
+    Image *outputImage = NULL;
     char *pos = NULL;
     char fileExtension[10];
 
@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     sscanf(pos,"%s",fileExtension);
 
     if (strcmp(fileExtension,"pgm")==0){
-        grayImage = readGrayImage(argv[1]);
+        grayImage = readImage(argv[1]);
         adjRel = createCircularAdjacency(atof(argv[3]));
 
         switch (atoi(argv[2])){
@@ -56,9 +56,9 @@ int main(int argc, char **argv) {
                 printf("Invalid Operation type:\n");
                 exit(-1);
         }
-        writeGrayImage(outputImage,argv[4]);
-        destroyGrayImage(&grayImage);
-        destroyGrayImage(&outputImage);
+        writeImage(outputImage,argv[4]);
+        destroyImage(&grayImage);
+        destroyImage(&outputImage);
         destroyAdjacencyRelation(&adjRel);
 
 

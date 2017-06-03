@@ -101,6 +101,14 @@ double randomNormalized(){
     return d;
 }
 
+double randomNumber(double low,double high){
+    float d;
+    d = (float) rand () / ((float) RAND_MAX + 1);
+    d = d * (high - low + 1);
+    d += low;
+    return d;
+}
+
 
 
 double generateGaussianNoise(double mean, double standardDeviation)

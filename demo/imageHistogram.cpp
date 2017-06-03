@@ -2,7 +2,7 @@
 
 int main(int argc, char **argv) {
     char             ext[10],*pos;
-    Histogram       *hist=NULL;
+    FeatureVector       *hist=NULL;
 
     if (argc != 4) {
         printf("histogram <image.[pgm,ppm]> <nbins> <histogram.txt>\n");
@@ -13,13 +13,13 @@ int main(int argc, char **argv) {
     sscanf(pos,"%s",ext);
 
     if (strcmp(ext,"pgm")==0){
-        GrayImage *grayImage = readGrayImage(argv[1]);
-        hist = GrayHistogram(grayImage,atoi(argv[2]));
-        destroyGrayImage(&grayImage);
+        Image *grayImage = readImage(argv[1]);
+        hist = computeHistogramForFeatureVectorGivenNBins(grayImage,atoi(argv[2]),true);
+        destroyImage(&grayImage);
     } else { /* ppm */
-        ColorImage *colorImage =  readColorImage(argv[1]);
-        hist = ColorHistogram(colorImage,atoi(argv[2]));
-        destroyColorImage(&colorImage);
+        Image *colorImage =  readImage(argv[1]);
+        hist = computeHistogramForFeatureVectorGivenNBins(colorImage,atoi(argv[2]),true);
+        destroyImage(&colorImage);
     }
     Image* image = readImage(argv[1]);
     Histogram *histogram = computeHistogram(image,43,true);

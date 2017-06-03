@@ -53,6 +53,8 @@ typedef struct _voxel {
 
 
 
+
+
 /* Common definitions */
 
 
@@ -70,7 +72,6 @@ typedef struct _voxel {
 #define INCREASING  1
 #define DECREASING  0
 #define Epsilon     1E-05  
-#define Y           0
 #define CG          1
 #define CO          2 
 #define AXIS_X  0
@@ -95,6 +96,9 @@ typedef struct _voxel {
 
 #define SIGN(x) ((x >= 0)?1:-1)
 
+#define isAlmostZero(value) (fabs( (double)value) <=  0.000001)
+
+
 int     AlmostZero(double x); /* Check if variable is almost zero*/
 char   *AllocCharArray(int n);  /* It allocates 1D array of n characters */
 uchar  *AllocUCharArray(int n);  /* It allocates 1D array of n characters */
@@ -117,9 +121,11 @@ http://www.ime.usp.br/~pf/algoritmos/aulas/random.html
  **/
 int RandomInteger (int low, int high);
 double randomNormalized();
+double randomNumber(double low,double high);
 double generateGaussianNoise(double mean, double standardDeviation);
 
 char *copyString(const char *str);
 char *splitStringAt(const char *phrase, const char *delimiter, long position);
 
 #endif
+

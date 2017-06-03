@@ -16,7 +16,6 @@ int main(int argc, char **argv) {
 
     //color image
     Image *colorImage = readImage("../data/lenaColor.ppm");
-    ColorImage *colorImage2 = readColorImage("../data/lenaColor.ppm");
     for (int i = 0; i < colorImage->ny; ++i) {
         for (int j = 0; j < colorImage->nx; ++j) {
             //int index = (i*colorImage->nx) + j;
@@ -29,15 +28,11 @@ int main(int argc, char **argv) {
 //            colorImage->channel[1][index] = 255 - colorImage->channel[1][index];
 //            colorImage->channel[2][index] = 255 - colorImage->channel[2][index];
 
-            colorImage2->cor[i][j].val[0] = 255 - colorImage2->cor[i][j].val[0];
-            colorImage2->cor[i][j].val[1] = 255 - colorImage2->cor[i][j].val[1];
-            colorImage2->cor[i][j].val[2] = 255 - colorImage2->cor[i][j].val[2];
         }
     }
     writeImage(colorImage,"outputColor.ppm");
 
     destroyImage(&grayImage);
     destroyImage(&colorImage);
-    destroyColorImage(&colorImage2);
     return 0;
 }
