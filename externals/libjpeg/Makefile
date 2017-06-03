@@ -1,11 +1,12 @@
 # The name of your C compiler:
-CC= cc
-CFLAGS= -O3
+CFLAGS= -O3 -Wall
 LIB=./lib
-INCLUDE = ./include
+INCLUDESDIR = ./include
 SRC=./source
 OBJ=./obj
 BIN=./bin
+
+INCLUDE = -I$(INCLUDESDIR)
 
 # Put here the object file name for the correct system-dependent memory
 # manager file.  For Unix this is usually jmemnobs.o, but you may want
@@ -63,242 +64,40 @@ $(OBJ)/jerror.o \
 $(OBJ)/jmemmgr.o \
 $(OBJ)/$(SYSDEPMEM).o \
 
-
 	ar csr $(LIB)/libjpeg.a \
-$(OBJ)/jcapimin.o \
-$(OBJ)/jcapistd.o \
-$(OBJ)/jcarith.o \
-$(OBJ)/jctrans.o \
-$(OBJ)/jcparam.o \
-$(OBJ)/jdatadst.o \
-$(OBJ)/jcinit.o \
-$(OBJ)/jcmaster.o \
-$(OBJ)/jcmarker.o \
-$(OBJ)/jcmainct.o \
-$(OBJ)/jcprepct.o \
-$(OBJ)/jccoefct.o \
-$(OBJ)/jccolor.o \
-$(OBJ)/jcsample.o \
-$(OBJ)/jchuff.o \
-$(OBJ)/jcdctmgr.o \
-$(OBJ)/jfdctfst.o \
-$(OBJ)/jfdctflt.o \
-$(OBJ)/jfdctint.o \
-$(OBJ)/jdapimin.o \
-$(OBJ)/jdapistd.o \
-$(OBJ)/jdarith.o \
-$(OBJ)/jdtrans.o \
-$(OBJ)/jdatasrc.o \
-$(OBJ)/jdmaster.o \
-$(OBJ)/jdinput.o \
-$(OBJ)/jdmarker.o \
-$(OBJ)/jdhuff.o \
-$(OBJ)/jdmainct.o \
-$(OBJ)/jdcoefct.o \
-$(OBJ)/jdpostct.o \
-$(OBJ)/jddctmgr.o \
-$(OBJ)/jidctfst.o \
-$(OBJ)/jidctflt.o \
-$(OBJ)/jidctint.o \
-$(OBJ)/jdsample.o \
-$(OBJ)/jdcolor.o \
-$(OBJ)/jquant1.o \
-$(OBJ)/jquant2.o \
-$(OBJ)/jdmerge.o \
-$(OBJ)/jaricom.o \
-$(OBJ)/jcomapi.o \
-$(OBJ)/jutils.o \
-$(OBJ)/jerror.o \
-$(OBJ)/jmemmgr.o \
-$(OBJ)/$(SYSDEPMEM).o \
+$(OBJ)/*.o
 
-# compression library object files
-$(OBJ)/jcapimin.o: $(SRC)/jcapimin.c
-	$(CC) $(CFLAGS) -c $(SRC)/jcapimin.c -I$(INCLUDE) \
-	-o $(OBJ)/jcapimin.o
+$(OBJ)/%.o: $(SRC)/%.c
+	$(CC) $(FLAGS) -c $< $(INCLUDE) -o $@
 
-$(OBJ)/jcapistd.o: $(SRC)/jcapistd.c
-	$(CC) $(CFLAGS) -c $(SRC)/jcapistd.c -I$(INCLUDE) \
-	-o $(OBJ)/jcapistd.o
+#compression library object files:
+#jcapimin.c jcapistd.c jcarith.c jctrans.c jcparam.c
+#jdatadst.c jcinit.c jcmaster.c jcmarker.c jcmainct.c
+#jcprepct.c jccoefct.c jccolor.c jcsample.c jchuff.c
+#jcdctmgr.c jfdctfst.c jfdctflt.c jfdctint.c
 
-$(OBJ)/jcarith.o: $(SRC)/jcarith.c
-	$(CC) $(CFLAGS) -c $(SRC)/jcarith.c -I$(INCLUDE) \
-	-o $(OBJ)/jcarith.o
+#decompression library object files:
+#jdapimin.c jdapistd.c jdarith.c jdtrans.c jdatasrc.c
+#jdmaster.c jdinput.c jdmarker.c jdhuff.c jdmainct.c
+#jdcoefct.c jdpostct.c jddctmgr.c jidctfst.c jidctflt.c
+#jidctint.c jdsample.c jdcolor.c jquant1.c jquant2.c
+#jdmerge.c
 
-$(OBJ)/jctrans.o: $(SRC)/jctrans.c
-	$(CC) $(CFLAGS) -c $(SRC)/jctrans.c -I$(INCLUDE) \
-	-o $(OBJ)/jctrans.o
+# library object files common to compression and decompression:
+#jaricom.c jcomapi.c jutils.c jerror.c jmemmgr.c
 
-$(OBJ)/jcparam.o: $(SRC)/jcparam.c
-	$(CC) $(CFLAGS) -c $(SRC)/jcparam.c -I$(INCLUDE) \
-	-o $(OBJ)/jcparam.o
+#System dependence memory:
 
-$(OBJ)/jdatadst.o: $(SRC)/jdatadst.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdatadst.c -I$(INCLUDE) \
-	-o $(OBJ)/jdatadst.o
+#This file provides a really simple implementation of the system-
+#dependent portion of the JPEG memory manager.  This implementation
+#assumes that no backing-store files are needed: all required space
+#can be obtained from malloc().
+#This is very portable in the sense that it'll compile on almost anything,
+#but you'd better have lots of main memory (or virtual memory) if you want
+#to process big images.
+#Note that the max_memory_to_use option is ignored by this implementation.
+#jmemnobs.c
 
-$(OBJ)/jcinit.o: $(SRC)/jcinit.c
-	$(CC) $(CFLAGS) -c $(SRC)/jcinit.c -I$(INCLUDE) \
-	-o $(OBJ)/jcinit.o
-
-$(OBJ)/jcmaster.o: $(SRC)/jcmaster.c
-	$(CC) $(CFLAGS) -c $(SRC)/jcmaster.c -I$(INCLUDE) \
-	-o $(OBJ)/jcmaster.o
-
-$(OBJ)/jcmarker.o: $(SRC)/jcmarker.c
-	$(CC) $(CFLAGS) -c $(SRC)/jcmarker.c -I$(INCLUDE) \
-	-o $(OBJ)/jcmarker.o
-
-$(OBJ)/jcmainct.o: $(SRC)/jcmainct.c
-	$(CC) $(CFLAGS) -c $(SRC)/jcmainct.c -I$(INCLUDE) \
-	-o $(OBJ)/jcmainct.o
-
-$(OBJ)/jcprepct.o: $(SRC)/jcprepct.c
-	$(CC) $(CFLAGS) -c $(SRC)/jcprepct.c -I$(INCLUDE) \
-	-o $(OBJ)/jcprepct.o
-
-$(OBJ)/jccoefct.o: $(SRC)/jccoefct.c
-	$(CC) $(CFLAGS) -c $(SRC)/jccoefct.c -I$(INCLUDE) \
-	-o $(OBJ)/jccoefct.o
-
-$(OBJ)/jccolor.o: $(SRC)/jccolor.c
-	$(CC) $(CFLAGS) -c $(SRC)/jccolor.c -I$(INCLUDE) \
-	-o $(OBJ)/jccolor.o
-
-$(OBJ)/jcsample.o: $(SRC)/jcsample.c
-	$(CC) $(CFLAGS) -c $(SRC)/jcsample.c -I$(INCLUDE) \
-	-o $(OBJ)/jcsample.o
-
-$(OBJ)/jchuff.o: $(SRC)/jchuff.c
-	$(CC) $(CFLAGS) -c $(SRC)/jchuff.c -I$(INCLUDE) \
-	-o $(OBJ)/jchuff.o
-
-$(OBJ)/jcdctmgr.o: $(SRC)/jcdctmgr.c
-	$(CC) $(CFLAGS) -c $(SRC)/jcdctmgr.c -I$(INCLUDE) \
-	-o $(OBJ)/jcdctmgr.o
-
-$(OBJ)/jfdctfst.o: $(SRC)/jfdctfst.c
-	$(CC) $(CFLAGS) -c $(SRC)/jfdctfst.c -I$(INCLUDE) \
-	-o $(OBJ)/jfdctfst.o
-
-$(OBJ)/jfdctflt.o: $(SRC)/jfdctflt.c
-	$(CC) $(CFLAGS) -c $(SRC)/jfdctflt.c -I$(INCLUDE) \
-	-o $(OBJ)/jfdctflt.o
-
-$(OBJ)/jfdctint.o: $(SRC)/jfdctint.c
-	$(CC) $(CFLAGS) -c $(SRC)/jfdctint.c -I$(INCLUDE) \
-	-o $(OBJ)/jfdctint.o
-
-
-# decompression library object files
-$(OBJ)/jdapimin.o: $(SRC)/jdapimin.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdapimin.c -I$(INCLUDE) \
-	-o $(OBJ)/jdapimin.o
-
-$(OBJ)/jdapistd.o: $(SRC)/jdapistd.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdapistd.c -I$(INCLUDE) \
-	-o $(OBJ)/jdapistd.o
-
-$(OBJ)/jdarith.o: $(SRC)/jdarith.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdarith.c -I$(INCLUDE) \
-	-o $(OBJ)/jdarith.o
-
-$(OBJ)/jdtrans.o: $(SRC)/jdtrans.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdtrans.c -I$(INCLUDE) \
-	-o $(OBJ)/jdtrans.o
-
-$(OBJ)/jdatasrc.o: $(SRC)/jdatasrc.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdatasrc.c -I$(INCLUDE) \
-	-o $(OBJ)/jdatasrc.o
-
-$(OBJ)/jdmaster.o: $(SRC)/jdmaster.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdmaster.c -I$(INCLUDE) \
-	-o $(OBJ)/jdmaster.o
-
-$(OBJ)/jdinput.o: $(SRC)/jdinput.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdinput.c -I$(INCLUDE) \
-	-o $(OBJ)/jdinput.o
-
-$(OBJ)/jdmarker.o: $(SRC)/jdmarker.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdmarker.c -I$(INCLUDE) \
-	-o $(OBJ)/jdmarker.o
-
-$(OBJ)/jdhuff.o: $(SRC)/jdhuff.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdhuff.c -I$(INCLUDE) \
-	-o $(OBJ)/jdhuff.o
-
-$(OBJ)/jdmainct.o: $(SRC)/jdmainct.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdmainct.c -I$(INCLUDE) \
-	-o $(OBJ)/jdmainct.o
-
-$(OBJ)/jdcoefct.o: $(SRC)/jdcoefct.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdcoefct.c -I$(INCLUDE) \
-	-o $(OBJ)/jdcoefct.o
-
-$(OBJ)/jdpostct.o: $(SRC)/jdpostct.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdpostct.c -I$(INCLUDE) \
-	-o $(OBJ)/jdpostct.o
-
-$(OBJ)/jddctmgr.o: $(SRC)/jddctmgr.c
-	$(CC) $(CFLAGS) -c $(SRC)/jddctmgr.c -I$(INCLUDE) \
-	-o $(OBJ)/jddctmgr.o
-
-$(OBJ)/jidctfst.o: $(SRC)/jidctfst.c
-	$(CC) $(CFLAGS) -c $(SRC)/jidctfst.c -I$(INCLUDE) \
-	-o $(OBJ)/jidctfst.o
-
-$(OBJ)/jidctflt.o: $(SRC)/jidctflt.c
-	$(CC) $(CFLAGS) -c $(SRC)/jidctflt.c -I$(INCLUDE) \
-	-o $(OBJ)/jidctflt.o
-
-$(OBJ)/jidctint.o: $(SRC)/jidctint.c
-	$(CC) $(CFLAGS) -c $(SRC)/jidctint.c -I$(INCLUDE) \
-	-o $(OBJ)/jidctint.o
-
-$(OBJ)/jdsample.o: $(SRC)/jdsample.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdsample.c -I$(INCLUDE) \
-	-o $(OBJ)/jdsample.o
-
-$(OBJ)/jdcolor.o: $(SRC)/jdcolor.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdcolor.c -I$(INCLUDE) \
-	-o $(OBJ)/jdcolor.o
-
-$(OBJ)/jquant1.o: $(SRC)/jquant1.c
-	$(CC) $(CFLAGS) -c $(SRC)/jquant1.c -I$(INCLUDE) \
-	-o $(OBJ)/jquant1.o
-
-$(OBJ)/jquant2.o: $(SRC)/jquant2.c
-	$(CC) $(CFLAGS) -c $(SRC)/jquant2.c -I$(INCLUDE) \
-	-o $(OBJ)/jquant2.o
-
-$(OBJ)/jdmerge.o: $(SRC)/jdmerge.c
-	$(CC) $(CFLAGS) -c $(SRC)/jdmerge.c -I$(INCLUDE) \
-	-o $(OBJ)/jdmerge.o
-
-# library object files common to compression and decompression
-$(OBJ)/jaricom.o: $(SRC)/jaricom.c
-	$(CC) $(CFLAGS) -c $(SRC)/jaricom.c -I$(INCLUDE) \
-	-o $(OBJ)/jaricom.o
-
-$(OBJ)/jcomapi.o: $(SRC)/jcomapi.c
-	$(CC) $(CFLAGS) -c $(SRC)/jcomapi.c -I$(INCLUDE) \
-	-o $(OBJ)/jcomapi.o
-
-$(OBJ)/jutils.o: $(SRC)/jutils.c
-	$(CC) $(CFLAGS) -c $(SRC)/jutils.c -I$(INCLUDE) \
-	-o $(OBJ)/jutils.o
-
-$(OBJ)/jerror.o: $(SRC)/jerror.c
-	$(CC) $(CFLAGS) -c $(SRC)/jerror.c -I$(INCLUDE) \
-	-o $(OBJ)/jerror.o
-
-$(OBJ)/jmemmgr.o: $(SRC)/jmemmgr.c
-	$(CC) $(CFLAGS) -c $(SRC)/jmemmgr.c -I$(INCLUDE) \
-	-o $(OBJ)/jmemmgr.o
-
-$(OBJ)/$(SYSDEPMEM).o: $(SRC)/$(SYSDEPMEM).c
-	$(CC) $(CFLAGS) -c $(SRC)/$(SYSDEPMEM).c -I$(INCLUDE) \
-	-o $(OBJ)/$(SYSDEPMEM).o
 
 clean:
 	rm $(LIB)/lib*.a; rm $(OBJ)/*.o;

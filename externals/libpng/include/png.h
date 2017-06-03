@@ -1,18 +1,18 @@
 
 /* png.h - header file for PNG reference library
  *
- * lib version 1.6.29, March 16, 2017
+ * libpng version 1.6.29, March 16, 2017
  *
  * Copyright (c) 1998-2002,2004,2006-2017 Glenn Randers-Pehrson
  * (Version 0.96 Copyright (c) 1996, 1997 Andreas Dilger)
  * (Version 0.88 Copyright (c) 1995, 1996 Guy Eric Schalnat, Group 42, Inc.)
  *
- * This code is released under the lib license (See LICENSE, below)
+ * This code is released under the libpng license (See LICENSE, below)
  *
  * Authors and maintainers:
- *   lib versions 0.71, May 1995, through 0.88, January 1996: Guy Schalnat
- *   lib versions 0.89, June 1996, through 0.96, May 1997: Andreas Dilger
- *   lib versions 0.97, January 1998, through 1.6.29, March 16, 2017:
+ *   libpng versions 0.71, May 1995, through 0.88, January 1996: Guy Schalnat
+ *   libpng versions 0.89, June 1996, through 0.96, May 1997: Andreas Dilger
+ *   libpng versions 0.97, January 1998, through 1.6.29, March 16, 2017:
  *     Glenn Randers-Pehrson.
  *   See also "Contributing Authors", below.
  */
@@ -20,15 +20,15 @@
 /*
  * COPYRIGHT NOTICE, DISCLAIMER, and LICENSE:
  *
- * If you modify lib you may insert additional notices immediately following
+ * If you modify libpng you may insert additional notices immediately following
  * this sentence.
  *
- * This code is released under the lib license.
+ * This code is released under the libpng license.
  *
- * lib versions 1.0.7, July 1, 2000 through 1.6.29, March 16, 2017 are
+ * libpng versions 1.0.7, July 1, 2000 through 1.6.29, March 16, 2017 are
  * Copyright (c) 2000-2002, 2004, 2006-2017 Glenn Randers-Pehrson, are
- * derived from lib-1.0.6, and are distributed according to the same
- * disclaimer and license as lib-1.0.6 with the following individuals
+ * derived from libpng-1.0.6, and are distributed according to the same
+ * disclaimer and license as libpng-1.0.6 with the following individuals
  * added to the list of Contributing Authors:
  *
  *    Simon-Pierre Cadieux
@@ -51,23 +51,23 @@
  *    the user.
  *
  * Some files in the "contrib" directory and some configure-generated
- * files that are distributed with lib have other copyright owners and
+ * files that are distributed with libpng have other copyright owners and
  * are released under other open source licenses.
  *
- * lib versions 0.97, January 1998, through 1.0.6, March 20, 2000, are
+ * libpng versions 0.97, January 1998, through 1.0.6, March 20, 2000, are
  * Copyright (c) 1998-2000 Glenn Randers-Pehrson, are derived from
- * lib-0.96, and are distributed according to the same disclaimer and
- * license as lib-0.96, with the following individuals added to the list
+ * libpng-0.96, and are distributed according to the same disclaimer and
+ * license as libpng-0.96, with the following individuals added to the list
  * of Contributing Authors:
  *
  *    Tom Lane
  *    Glenn Randers-Pehrson
  *    Willem van Schaik
  *
- * lib versions 0.89, June 1996, through 0.96, May 1997, are
- * Copyright (c) 1996-1997 Andreas Dilger, are derived from lib-0.88,
+ * libpng versions 0.89, June 1996, through 0.96, May 1997, are
+ * Copyright (c) 1996-1997 Andreas Dilger, are derived from libpng-0.88,
  * and are distributed according to the same disclaimer and license as
- * lib-0.88, with the following individuals added to the list of
+ * libpng-0.88, with the following individuals added to the list of
  * Contributing Authors:
  *
  *    John Bowler
@@ -80,7 +80,7 @@
  * Some files in the "scripts" directory have other copyright owners
  * but are released under this license.
  *
- * lib versions 0.5, May 1995, through 0.88, January 1996, are
+ * libpng versions 0.5, May 1995, through 0.88, January 1996, are
  * Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
  *
  * For the purposes of this copyright and license, "Contributing Authors"
@@ -122,8 +122,8 @@
  *
  * TRADEMARK:
  *
- * The name "lib" has not been registered by the Copyright owner
- * as a trademark in any jurisdiction.  However, because lib has
+ * The name "libpng" has not been registered by the Copyright owner
+ * as a trademark in any jurisdiction.  However, because libpng has
  * been distributed and maintained world-wide, continually since 1995,
  * the Copyright owner claims "common-law trademark protection" in any
  * jurisdiction where common-law trademark is recognized.
@@ -137,7 +137,7 @@
  * EXPORT CONTROL:
  *
  * The Copyright owner believes that the Export Control Classification
- * Number (ECCN) for lib is EAR99, which means not subject to export
+ * Number (ECCN) for libpng is EAR99, which means not subject to export
  * controls or International Traffic in Arms Regulations (ITAR) because
  * it is open source, publicly available software, that does not contain
  * any encryption software.  See the EAR, paragraphs 734.3(b)(3) and
@@ -162,7 +162,7 @@
  * Thanks to Frank J. T. Wojcik for helping with the documentation.
  */
 
-/* Note about lib version numbers:
+/* Note about libpng version numbers:
  *
  *    Due to various miscommunications, unforeseen code incompatibilities
  *    and occasional factors outside the authors' control, version numbering
@@ -218,7 +218,7 @@
  *    Henceforth the source version will match the shared-library major
  *    and minor numbers; the shared-library major version number will be
  *    used for changes in backward compatibility, as it is intended.  The
- *    PNG_LIBPNG_VER macro, which is not used within lib but is available
+ *    PNG_LIBPNG_VER macro, which is not used within libpng but is available
  *    for applications, is an unsigned integer of the form xyyzz corresponding
  *    to the source version x.y.z (leading zeros in y and z).  Beta versions
  *    were given the previous public release number plus a letter, until
@@ -232,13 +232,13 @@
  *    DLLNUM will change each time there are forward or backward changes
  *    in binary compatibility (e.g., when a new feature is added).
  *
- * See lib.txt or lib.3 for more information.  The PNG specification
+ * See libpng.txt or libpng.3 for more information.  The PNG specification
  * is available as a W3C Recommendation and as an ISO Specification,
  * <http://www.w3.org/TR/2003/REC-PNG-20031110/
  */
 
 /*
- * Y2K compliance in lib:
+ * Y2K compliance in libpng:
  * =========================
  *
  *    March 16, 2017
@@ -246,7 +246,7 @@
  *    Since the PNG Development group is an ad-hoc body, we can't make
  *    an official declaration.
  *
- *    This is your unofficial assurance that lib from version 0.71 and
+ *    This is your unofficial assurance that libpng from version 0.71 and
  *    upward through 1.6.29 are Y2K compliant.  It is my belief that
  *    earlier versions were also Y2K compliant.
  *
@@ -259,12 +259,12 @@
  *
  *    The string is
  *        "char time_buffer[29]" in png_struct.  This is no longer used
- *    in lib-1.6.x and will be removed from lib-1.7.0.
+ *    in libpng-1.6.x and will be removed from libpng-1.7.0.
  *
  *    There are seven time-related functions:
  *        png.c: png_convert_to_rfc_1123_buffer() in png.c
- *          (formerly png_convert_to_rfc_1123() prior to lib-1.5.x and
- *          png_convert_to_rfc_1152() in error prior to lib-0.98)
+ *          (formerly png_convert_to_rfc_1123() prior to libpng-1.5.x and
+ *          png_convert_to_rfc_1152() in error prior to libpng-0.98)
  *        png_convert_from_struct_tm() in pngwrite.c, called in pngwrite.c
  *        png_convert_from_time_t() in pngwrite.c
  *        png_get_tIME() in pngget.c
@@ -275,33 +275,33 @@
  *    All handle dates properly in a Y2K environment.  The
  *    png_convert_from_time_t() function calls gmtime() to convert from system
  *    clock time, which returns (year - 1900), which we properly convert to
- *    the full 4-digit year.  There is a possibility that lib applications
+ *    the full 4-digit year.  There is a possibility that libpng applications
  *    are not passing 4-digit years into the png_convert_to_rfc_1123_buffer()
  *    function, or that they are incorrectly passing only a 2-digit year
  *    instead of "year - 1900" into the png_convert_from_struct_tm() function,
- *    but this is not under our control.  The lib documentation has always
+ *    but this is not under our control.  The libpng documentation has always
  *    stated that it works with 4-digit years, and the APIs have been
  *    documented as such.
  *
  *    The tIME chunk itself is also Y2K compliant.  It uses a 2-byte unsigned
  *    integer to hold the year, and can hold years as large as 65535.
  *
- *    zlib, upon which lib depends, is also Y2K compliant.  It contains
+ *    zlib, upon which libpng depends, is also Y2K compliant.  It contains
  *    no date-related code.
  *
  *       Glenn Randers-Pehrson
- *       lib maintainer
+ *       libpng maintainer
  *       PNG Development Group
  */
 
 #ifndef PNG_H
 #define PNG_H
 
-/* This is not the place to learn how to use lib. The file lib-manual.txt
- * describes how to use lib, and the file example.c summarizes it
+/* This is not the place to learn how to use libpng. The file libpng-manual.txt
+ * describes how to use libpng, and the file example.c summarizes it
  * with some code on which to build.  This file is useful for looking
  * at the actual function definitions and structure components.  If that
- * file has been stripped from your copy of lib, you can find it at
+ * file has been stripped from your copy of libpng, you can find it at
  * <http://www.libpng.org/pub/png/libpng-manual.txt>
  *
  * If you just need to read a PNG file and don't want to read the documentation
@@ -367,7 +367,7 @@
 #endif
 
 /*
- * Added at lib-1.2.8
+ * Added at libpng-1.2.8
  *
  * Ref MSDN: Private as priority over Special
  * VS_FF_PRIVATEBUILD File *was not* built using standard release
@@ -394,7 +394,7 @@
 
 #ifndef PNG_VERSION_INFO_ONLY
 
-/* Inhibit C++ name-mangling for lib functions but not for system calls. */
+/* Inhibit C++ name-mangling for libpng functions but not for system calls. */
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -461,7 +461,7 @@ extern "C" {
  */
 typedef char* png_libpng_version_1_6_29;
 
-/* Basic control structions.  Read lib-manual.txt or lib.3 for more info.
+/* Basic control structions.  Read libpng-manual.txt or libpng.3 for more info.
  *
  * png_struct is the cache of information used while reading or writing a single
  * PNG file.  One of these is always required, although the simplified API
@@ -474,12 +474,12 @@ typedef png_struct * * png_structpp;
 
 /* png_info contains information read from or to be written to a PNG file.  One
  * or more of these must exist while reading or creating a PNG file.  The
- * information is not used by lib during read but is used to control what
+ * information is not used by libpng during read but is used to control what
  * gets written when a PNG file is created.  "png_get_" function calls read
  * information during read and "png_set_" functions calls write information
  * when creating a PNG.
  * been moved into a separate header file that is not accessible to
- * applications.  Read lib-manual.txt or lib.3 for more info.
+ * applications.  Read libpng-manual.txt or libpng.3 for more info.
  */
 typedef struct png_info_def png_info;
 typedef png_info * png_infop;
@@ -493,7 +493,7 @@ typedef png_info * * png_infopp;
  * it is always valid to pass 'p' to a pointer with a function argument of the
  * corresponding 'rp' type.  Different compilers have different rules with
  * regard to type matching in the presence of 'restrict'.  For backward
- * compatibility lib callbacks never have 'restrict' in their parameters and,
+ * compatibility libpng callbacks never have 'restrict' in their parameters and,
  * consequentially, writing portable application code is extremely difficult if
  * an attempt is made to use 'restrict'.
  */
@@ -582,7 +582,7 @@ typedef png_sPLT_t * * png_sPLT_tpp;
  * empty), never a NULL pointer, so it can be safely used in printf() and
  * other string-handling functions.  Note that the "itxt_length", "lang", and
  * "lang_key" members of the structure only exist when the library is built
- * with iTXt chunk support.  Prior to lib-1.4.0 the library was built by
+ * with iTXt chunk support.  Prior to libpng-1.4.0 the library was built by
  * default without iTXt support. Also note that when iTXt *is* supported,
  * the "lang" and "lang_key" fields contain NULL pointers when the
  * "compression" field contains * PNG_TEXT_COMPRESSION_NONE or
@@ -648,7 +648,7 @@ typedef png_time * * png_timepp;
  * up private chunks for output even though the library doesn't actually
  * know about their semantics.
  *
- * The data in the structure is set by lib on read and used on write.
+ * The data in the structure is set by libpng on read and used on write.
  */
 typedef struct png_unknown_chunk_t
 {
@@ -657,7 +657,7 @@ typedef struct png_unknown_chunk_t
    png_size_t size;
 
    /* On write 'location' must be set using the flag values listed below.
-    * Notice that on read it is set by lib however the values stored have
+    * Notice that on read it is set by libpng however the values stored have
     * more bits set than are listed below.  Always treat the value as a
     * bitmask.  On write set only one bit - setting multiple bits may cause the
     * chunk to be written in multiple places.
@@ -872,12 +872,12 @@ PNG_FUNCTION(void, (PNGCAPI *png_longjmp_ptr), PNGARG((jmp_buf, int)), typedef);
 #define PNG_TRANSFORM_SWAP_ENDIAN    0x0200    /* read and write */
 #define PNG_TRANSFORM_INVERT_ALPHA   0x0400    /* read and write */
 #define PNG_TRANSFORM_STRIP_FILLER   0x0800    /* write only */
-/* Added to lib-1.2.34 */
+/* Added to libpng-1.2.34 */
 #define PNG_TRANSFORM_STRIP_FILLER_BEFORE PNG_TRANSFORM_STRIP_FILLER
 #define PNG_TRANSFORM_STRIP_FILLER_AFTER 0x1000 /* write only */
-/* Added to lib-1.4.0 */
+/* Added to libpng-1.4.0 */
 #define PNG_TRANSFORM_GRAY_TO_RGB   0x2000      /* read only */
-/* Added to lib-1.5.4 */
+/* Added to libpng-1.5.4 */
 #define PNG_TRANSFORM_EXPAND_16     0x4000      /* read only */
 #if INT_MAX >= 0x8000 /* else this might break */
 #define PNG_TRANSFORM_SCALE_16      0x8000      /* read only */
@@ -900,7 +900,7 @@ typedef PNG_CALLBACK(void, *png_free_ptr, (png_structp, png_voidp));
 
 /* Section 4: exported functions
  * Here are the function definitions most commonly used.  This is not
- * the place to find out how to use lib.  See lib-manual.txt for the
+ * the place to find out how to use libpng.  See libpng-manual.txt for the
  * full explanation, see example.c for the summary.  This just provides
  * a simple one line description of the use of each function.
  *
@@ -985,10 +985,10 @@ PNG_EXPORT(8, jmp_buf*, png_set_longjmp_fn, (png_structrp png_ptr,
 #  define png_jmpbuf(png_ptr) \
       (LIBPNG_WAS_COMPILED_WITH__PNG_NO_SETJMP)
 #endif
-/* This function should be used by lib applications in place of
+/* This function should be used by libpng applications in place of
  * longjmp(png_ptr->jmpbuf, val).  If longjmp_fn() has been set, it
  * will use it; otherwise it will call PNG_ABORT().  This function was
- * added in lib-1.5.0.
+ * added in libpng-1.5.0.
  */
 PNG_EXPORTA(9, void, png_longjmp, (png_const_structrp png_ptr, int val),
     PNG_NORETURN);
@@ -998,7 +998,7 @@ PNG_EXPORTA(9, void, png_longjmp, (png_const_structrp png_ptr, int val),
 PNG_EXPORTA(10, int, png_reset_zstream, (png_structrp png_ptr), PNG_DEPRECATED);
 #endif
 
-/* New functions added in lib-1.0.2 (not enabled by default until 1.2.0) */
+/* New functions added in libpng-1.0.2 (not enabled by default until 1.2.0) */
 #ifdef PNG_USER_MEM_SUPPORTED
 PNG_EXPORTA(11, png_structp, png_create_read_struct_2,
     (png_const_charp user_png_ver, png_voidp error_ptr, png_error_ptr error_fn,
@@ -1171,7 +1171,7 @@ PNG_FIXED_EXPORT(228, void, png_set_alpha_mode_fixed, (png_structrp png_ptr,
 #endif
 
 #if defined(PNG_GAMMA_SUPPORTED) || defined(PNG_READ_ALPHA_MODE_SUPPORTED)
-/* The output_gamma value is a screen gamma in lib terminology: it expresses
+/* The output_gamma value is a screen gamma in libpng terminology: it expresses
  * how to decode the output values, not how they are encoded.
  */
 #define PNG_DEFAULT_sRGB -1       /* sRGB gamma and color space */
@@ -1185,7 +1185,7 @@ PNG_FIXED_EXPORT(228, void, png_set_alpha_mode_fixed, (png_structrp png_ptr,
  * premultiplication.
  *
  * png_set_alpha_mode(pp, PNG_ALPHA_PNG, PNG_DEFAULT_sRGB);
- *    This is the default lib handling of the alpha channel - it is not
+ *    This is the default libpng handling of the alpha channel - it is not
  *    pre-multiplied into the color components.  In addition the call states
  *    that the output is for a sRGB system and causes all PNG files without gAMA
  *    chunks to be assumed to be encoded using sRGB.
@@ -1322,7 +1322,7 @@ PNG_EXPORT(46, void, png_set_invert_mono, (png_structrp png_ptr));
 
 #ifdef PNG_READ_BACKGROUND_SUPPORTED
 /* Handle alpha and tRNS by replacing with a background color.  Prior to
- * lib-1.5.4 this API must not be called before the PNG file header has been
+ * libpng-1.5.4 this API must not be called before the PNG file header has been
  * read.  Doing so will result in unexpected behavior and possible warnings or
  * errors if the PNG file contains a bKGD chunk.
  */
@@ -1420,7 +1420,7 @@ PNG_EXPORT(58, void, png_write_row, (png_structrp png_ptr,
 
 /* Write a few rows of image data: (*row) is not written; however, the type
  * is declared as writeable to maintain compatibility with previous versions
- * of lib and to allow the 'display_row' array from read_rows to be passed
+ * of libpng and to allow the 'display_row' array from read_rows to be passed
  * unchanged to write_rows.
  */
 PNG_EXPORT(59, void, png_write_rows, (png_structrp png_ptr, png_bytepp row,
@@ -1450,7 +1450,7 @@ PNG_EXPORT(64, void, png_destroy_read_struct, (png_structpp png_ptr_ptr,
 PNG_EXPORT(65, void, png_destroy_write_struct, (png_structpp png_ptr_ptr,
     png_infopp info_ptr_ptr));
 
-/* Set the lib method of handling chunk CRC errors */
+/* Set the libpng method of handling chunk CRC errors */
 PNG_EXPORT(66, void, png_set_crc_action, (png_structrp png_ptr, int crit_action,
     int ancil_action));
 
@@ -1472,14 +1472,14 @@ PNG_EXPORT(66, void, png_set_crc_action, (png_structrp png_ptr, int crit_action,
 
 #ifdef PNG_WRITE_SUPPORTED
 /* These functions give the user control over the scan-line filtering in
- * lib and the compression methods used by zlib.  These functions are
+ * libpng and the compression methods used by zlib.  These functions are
  * mainly useful for testing, as the defaults should work with most users.
  * Those users who are tight on memory or want faster performance at the
  * expense of compression can modify them.  See the compression library
  * header file (zlib.h) for an explination of the compression functions.
  */
 
-/* Set the filtering method(s) used by lib.  Currently, the only valid
+/* Set the filtering method(s) used by libpng.  Currently, the only valid
  * value for "method" is 0.
  */
 PNG_EXPORT(67, void, png_set_filter, (png_structrp png_ptr, int method,
@@ -1521,7 +1521,7 @@ PNG_FIXED_EXPORT(209, void, png_set_filter_heuristics_fixed,
     png_const_fixed_point_p filter_costs))
 #endif /* WRITE_WEIGHTED_FILTER */
 
-/* The following are no longer used and will be removed from lib-1.7: */
+/* The following are no longer used and will be removed from libpng-1.7: */
 #define PNG_FILTER_HEURISTIC_DEFAULT    0  /* Currently "UNWEIGHTED" */
 #define PNG_FILTER_HEURISTIC_UNWEIGHTED 1  /* Used by libpng < 0.95 */
 #define PNG_FILTER_HEURISTIC_WEIGHTED   2  /* Experimental feature */
@@ -1544,7 +1544,7 @@ PNG_EXPORT(70, void, png_set_compression_mem_level, (png_structrp png_ptr,
 PNG_EXPORT(71, void, png_set_compression_strategy, (png_structrp png_ptr,
     int strategy));
 
-/* If PNG_WRITE_OPTIMIZE_CMF_SUPPORTED is defined, lib will use a
+/* If PNG_WRITE_OPTIMIZE_CMF_SUPPORTED is defined, libpng will use a
  * smaller value of window_bits if it can do so safely.
  */
 PNG_EXPORT(72, void, png_set_compression_window_bits, (png_structrp png_ptr,
@@ -1565,7 +1565,7 @@ PNG_EXPORT(223, void, png_set_text_compression_mem_level, (png_structrp png_ptr,
 PNG_EXPORT(224, void, png_set_text_compression_strategy, (png_structrp png_ptr,
     int strategy));
 
-/* If PNG_WRITE_OPTIMIZE_CMF_SUPPORTED is defined, lib will use a
+/* If PNG_WRITE_OPTIMIZE_CMF_SUPPORTED is defined, libpng will use a
  * smaller value of window_bits if it can do so safely.
  */
 PNG_EXPORT(225, void, png_set_text_compression_window_bits,
@@ -1581,7 +1581,7 @@ PNG_EXPORT(226, void, png_set_text_compression_method, (png_structrp png_ptr,
  * and call standard C I/O routines such as fread(), fwrite(), and
  * fprintf().  These functions can be made to use other I/O routines
  * at run time for those applications that need to handle I/O in a
- * different manner by calling png_set_???_fn().  See lib-manual.txt for
+ * different manner by calling png_set_???_fn().  See libpng-manual.txt for
  * more information.
  */
 
@@ -1606,11 +1606,11 @@ PNG_EXPORT(76, png_voidp, png_get_error_ptr, (png_const_structrp png_ptr));
 
 /* Replace the default data output functions with a user supplied one(s).
  * If buffered output is not used, then output_flush_fn can be set to NULL.
- * If PNG_WRITE_FLUSH_SUPPORTED is not defined at lib compile time
+ * If PNG_WRITE_FLUSH_SUPPORTED is not defined at libpng compile time
  * output_flush_fn will be ignored (and thus can be NULL).
  * It is probably a mistake to use NULL for output_flush_fn if
- * write_data_fn is not also NULL unless you have built lib with
- * PNG_WRITE_FLUSH_SUPPORTED undefined, because in this case lib's
+ * write_data_fn is not also NULL unless you have built libpng with
+ * PNG_WRITE_FLUSH_SUPPORTED undefined, because in this case libpng's
  * default flush function, which uses the standard *FILE structure, will
  * be used.
  */
@@ -1688,10 +1688,10 @@ PNG_EXPORT(218, png_byte, png_get_current_pass_number, (png_const_structrp));
  * negative: An error occurred; png_chunk_error will be called.
  *     zero: The chunk was not handled, the chunk will be saved. A critical
  *           chunk will cause an error at this point unless it is to be saved.
- * positive: The chunk was handled, lib will ignore/discard it.
+ * positive: The chunk was handled, libpng will ignore/discard it.
  *
  * See "INTERACTION WTIH USER CHUNK CALLBACKS" below for important notes about
- * how this behavior will change in lib 1.7
+ * how this behavior will change in libpng 1.7
  */
 PNG_EXPORT(88, void, png_set_read_user_chunk_fn, (png_structrp png_ptr,
     png_voidp user_chunk_ptr, png_user_chunk_ptr read_user_chunk_fn));
@@ -1719,7 +1719,7 @@ PNG_EXPORT(92, void, png_process_data, (png_structrp png_ptr,
 
 /* A function which may be called *only* within png_process_data to stop the
  * processing of any more data.  The function returns the number of bytes
- * remaining, excluding any that lib has cached internally.  A subsequent
+ * remaining, excluding any that libpng has cached internally.  A subsequent
  * call to png_process_data must supply these bytes again.  If the argument
  * 'save' is set to true the routine will first save all the pending data and
  * will always return 0.
@@ -1745,11 +1745,11 @@ PNG_EXPORT(93, void, png_progressive_combine_row, (png_const_structrp png_ptr,
 
 PNG_EXPORTA(94, png_voidp, png_malloc, (png_const_structrp png_ptr,
     png_alloc_size_t size), PNG_ALLOCATED);
-/* Added at lib version 1.4.0 */
+/* Added at libpng version 1.4.0 */
 PNG_EXPORTA(95, png_voidp, png_calloc, (png_const_structrp png_ptr,
     png_alloc_size_t size), PNG_ALLOCATED);
 
-/* Added at lib version 1.2.4 */
+/* Added at libpng version 1.2.4 */
 PNG_EXPORTA(96, png_voidp, png_malloc_warn, (png_const_structrp png_ptr,
     png_alloc_size_t size), PNG_ALLOCATED);
 
@@ -1761,7 +1761,7 @@ PNG_EXPORT(98, void, png_free_data, (png_const_structrp png_ptr,
     png_inforp info_ptr, png_uint_32 free_me, int num));
 
 /* Reassign responsibility for freeing existing data, whether allocated
- * by lib or by the application; this works on the png_info structure passed
+ * by libpng or by the application; this works on the png_info structure passed
  * in, it does not change the state for other png_info structures.
  *
  * It is unlikely that this function works correctly as of 1.6.0 and using it
@@ -1799,7 +1799,7 @@ PNG_EXPORTA(101, void, png_free_default, (png_const_structrp png_ptr,
 #endif
 
 #ifdef PNG_ERROR_TEXT_SUPPORTED
-/* Fatal error in PNG image of lib - can't continue */
+/* Fatal error in PNG image of libpng - can't continue */
 PNG_EXPORTA(102, void, png_error, (png_const_structrp png_ptr,
     png_const_charp error_message), PNG_NORETURN);
 
@@ -1808,18 +1808,18 @@ PNG_EXPORTA(103, void, png_chunk_error, (png_const_structrp png_ptr,
     png_const_charp error_message), PNG_NORETURN);
 
 #else
-/* Fatal error in PNG image of lib - can't continue */
+/* Fatal error in PNG image of libpng - can't continue */
 PNG_EXPORTA(104, void, png_err, (png_const_structrp png_ptr), PNG_NORETURN);
 #  define png_error(s1,s2) png_err(s1)
 #  define png_chunk_error(s1,s2) png_err(s1)
 #endif
 
 #ifdef PNG_WARNINGS_SUPPORTED
-/* Non-fatal error in lib.  Can continue, but may have a problem. */
+/* Non-fatal error in libpng.  Can continue, but may have a problem. */
 PNG_EXPORT(105, void, png_warning, (png_const_structrp png_ptr,
     png_const_charp warning_message));
 
-/* Non-fatal error in lib, chunk name is prepended to message. */
+/* Non-fatal error in libpng, chunk name is prepended to message. */
 PNG_EXPORT(106, void, png_chunk_warning, (png_const_structrp png_ptr,
     png_const_charp warning_message));
 #else
@@ -1828,7 +1828,7 @@ PNG_EXPORT(106, void, png_chunk_warning, (png_const_structrp png_ptr,
 #endif
 
 #ifdef PNG_BENIGN_ERRORS_SUPPORTED
-/* Benign error in lib.  Can continue, but may have a problem.
+/* Benign error in libpng.  Can continue, but may have a problem.
  * User can choose whether to handle as a fatal error or as a warning. */
 PNG_EXPORT(107, void, png_benign_error, (png_const_structrp png_ptr,
     png_const_charp warning_message));
@@ -2211,7 +2211,7 @@ PNG_EXPORT(171, void, png_set_sCAL_s, (png_const_structrp png_ptr,
  *
  * READ:
  *    PNG_HANDLE_CHUNK_AS_DEFAULT:
- *       Known chunks: do normal lib processing, do not keep the chunk (but
+ *       Known chunks: do normal libpng processing, do not keep the chunk (but
  *          see the comments below about PNG_HANDLE_AS_UNKNOWN_SUPPORTED)
  *       Unknown chunks: for a specific chunk use the global default, when used
  *          as the default discard the chunk data.
@@ -2226,7 +2226,7 @@ PNG_EXPORT(171, void, png_set_sCAL_s, (png_const_structrp png_ptr,
  * If the chunk data is saved it can be retrieved using png_get_unknown_chunks,
  * below.  Notice that specifying "AS_DEFAULT" as a global default is equivalent
  * to specifying "NEVER", however when "AS_DEFAULT" is used for specific chunks
- * it simply resets the behavior to the lib default.
+ * it simply resets the behavior to the libpng default.
  *
  * INTERACTION WTIH USER CHUNK CALLBACKS:
  * The per-chunk handling is always used when there is a png_user_chunk_ptr
@@ -2235,29 +2235,29 @@ PNG_EXPORT(171, void, png_set_sCAL_s, (png_const_structrp png_ptr,
  * the global default is *not* used in this case.  (In effect the per-chunk
  * value is incremented to at least IF_SAFE.)
  *
- * IMPORTANT NOTE: this behavior will change in lib 1.7 - the global and
+ * IMPORTANT NOTE: this behavior will change in libpng 1.7 - the global and
  * per-chunk defaults will be honored.  If you want to preserve the current
  * behavior when your callback returns 0 you must set PNG_HANDLE_CHUNK_IF_SAFE
- * as the default - if you don't do this lib 1.6 will issue a warning.
+ * as the default - if you don't do this libpng 1.6 will issue a warning.
  *
- * If you want unhandled unknown chunks to be discarded in lib 1.6 and
+ * If you want unhandled unknown chunks to be discarded in libpng 1.6 and
  * earlier simply return '1' (handled).
  *
  * PNG_HANDLE_AS_UNKNOWN_SUPPORTED:
- *    If this is *not* set known chunks will always be handled by lib and
+ *    If this is *not* set known chunks will always be handled by libpng and
  *    will never be stored in the unknown chunk list.  Known chunks listed to
  *    png_set_keep_unknown_chunks will have no effect.  If it is set then known
  *    chunks listed with a keep other than AS_DEFAULT will *never* be processed
- *    by lib, in addition critical chunks must either be processed by the
+ *    by libpng, in addition critical chunks must either be processed by the
  *    callback or saved.
  *
  *    The IHDR and IEND chunks must not be listed.  Because this turns off the
  *    default handling for chunks that would otherwise be recognized the
- *    behavior of lib transformations may well become incorrect!
+ *    behavior of libpng transformations may well become incorrect!
  *
  * WRITE:
  *    When writing chunks the options only apply to the chunks specified by
- *    png_set_unknown_chunks (below), lib will *always* write known chunks
+ *    png_set_unknown_chunks (below), libpng will *always* write known chunks
  *    required by png_set_ calls and will always write the core critical chunks
  *    (as required for PLTE).
  *
@@ -2291,9 +2291,9 @@ PNG_EXPORT(171, void, png_set_sCAL_s, (png_const_structrp png_ptr,
  *    unknown chunks, as described above.
  *
  *    If num_chunks is negative, then the "keep" parameter specifies the manner
- *    for handling all unknown chunks plus all chunks recognized by lib
+ *    for handling all unknown chunks plus all chunks recognized by libpng
  *    except for the IHDR, PLTE, tRNS, IDAT, and IEND chunks (which continue to
- *    be processed by lib.
+ *    be processed by libpng.
  */
 #ifdef PNG_HANDLE_AS_UNKNOWN_SUPPORTED
 PNG_EXPORT(172, void, png_set_keep_unknown_chunks, (png_structrp png_ptr,
@@ -2376,7 +2376,7 @@ PNG_EXPORT(185, void, png_set_strip_error_numbers, (png_structrp png_ptr,
     png_uint_32 strip_mode));
 #endif
 
-/* Added in lib-1.2.6 */
+/* Added in libpng-1.2.6 */
 #ifdef PNG_SET_USER_LIMITS_SUPPORTED
 PNG_EXPORT(186, void, png_set_user_limits, (png_structrp png_ptr,
     png_uint_32 user_width_max, png_uint_32 user_height_max));
@@ -2384,12 +2384,12 @@ PNG_EXPORT(187, png_uint_32, png_get_user_width_max,
     (png_const_structrp png_ptr));
 PNG_EXPORT(188, png_uint_32, png_get_user_height_max,
     (png_const_structrp png_ptr));
-/* Added in lib-1.4.0 */
+/* Added in libpng-1.4.0 */
 PNG_EXPORT(189, void, png_set_chunk_cache_max, (png_structrp png_ptr,
     png_uint_32 user_chunk_cache_max));
 PNG_EXPORT(190, png_uint_32, png_get_chunk_cache_max,
     (png_const_structrp png_ptr));
-/* Added in lib-1.4.1 */
+/* Added in libpng-1.4.1 */
 PNG_EXPORT(191, void, png_set_chunk_malloc_max, (png_structrp png_ptr,
     png_alloc_size_t user_chunk_cache_max));
 PNG_EXPORT(192, png_alloc_size_t, png_get_chunk_malloc_max,
@@ -2427,11 +2427,11 @@ PNG_EXPORT(198, png_uint_32, png_get_pHYs_dpi, (png_const_structrp png_ptr,
 #  endif /* pHYs */
 #endif  /* INCH_CONVERSIONS */
 
-/* Added in lib-1.4.0 */
+/* Added in libpng-1.4.0 */
 #ifdef PNG_IO_STATE_SUPPORTED
 PNG_EXPORT(199, png_uint_32, png_get_io_state, (png_const_structrp png_ptr));
 
-/* Removed from lib 1.6; use png_get_io_chunk_type. */
+/* Removed from libpng 1.6; use png_get_io_chunk_type. */
 PNG_REMOVED(200, png_const_bytep, png_get_io_chunk_name, (png_structrp png_ptr),
     PNG_DEPRECATED)
 
@@ -2451,7 +2451,7 @@ PNG_EXPORT(216, png_uint_32, png_get_io_chunk_type,
 #endif /* IO_STATE */
 
 /* Interlace support.  The following macros are always defined so that if
- * lib interlace handling is turned off the macros may be used to handle
+ * libpng interlace handling is turned off the macros may be used to handle
  * interlaced images within the application.
  */
 #define PNG_INTERLACE_ADAM7_PASSES 7
@@ -2598,7 +2598,7 @@ PNG_EXPORT(207, void, png_save_uint_16, (png_bytep buf, unsigned int i));
     ((png_uint_32)(*((buf) + 2)) << 8) + \
     ((png_uint_32)(*((buf) + 3))))
 
-   /* From lib-1.4.0 until 1.4.4, the png_get_uint_16 macro (but not the
+   /* From libpng-1.4.0 until 1.4.4, the png_get_uint_16 macro (but not the
     * function) incorrectly returned a value of type png_uint_32.
     */
 #  define PNG_get_uint_16(buf) \
@@ -2702,7 +2702,7 @@ typedef struct
 
    /* In the event of an error or warning the following field will be set to a
     * non-zero value and the 'message' field will contain a '\0' terminated
-    * string with the lib error or warning message.  If both warnings and
+    * string with the libpng error or warning message.  If both warnings and
     * an error were encountered, only the error is recorded.  If there
     * are multiple warnings, only the first one is recorded.
     *
@@ -2754,7 +2754,7 @@ typedef struct
  * When the simplified API needs to convert between sRGB and linear colorspaces,
  * the actual sRGB transfer curve defined in the sRGB specification (see the
  * article at http://en.wikipedia.org/wiki/SRGB) is used, not the gamma=1/2.2
- * approximation used elsewhere in lib.
+ * approximation used elsewhere in libpng.
  *
  * When an alpha channel is present it is expected to denote pixel coverage
  * of the color or luminance channels and is returned as an associated alpha
@@ -2785,10 +2785,10 @@ typedef struct
  * called to read or write the color-map and set the format correctly for the
  * image data.  Do not set the PNG_FORMAT_FLAG_COLORMAP bit directly!
  *
- * NOTE: lib can be built with particular features disabled. If you see
+ * NOTE: libpng can be built with particular features disabled. If you see
  * compiler errors because the definition of one of the following flags has been
- * compiled out it is because lib does not have the required support.  It is
- * possible, however, for the lib configuration to enable the format on just
+ * compiled out it is because libpng does not have the required support.  It is
+ * possible, however, for the libpng configuration to enable the format on just
  * read or just write; in that case you may see an error at run time.  You can
  * guard against this by checking for the definition of the appropriate
  * "_SUPPORTED" macro, one of:
@@ -2921,7 +2921,7 @@ typedef struct
     * row.
     *
     * WARNING: this macro overflows for some images with more than one component
-    * and very large image widths.  lib will refuse to process an image where
+    * and very large image widths.  libpng will refuse to process an image where
     * this macro would overflow.
     */
 
@@ -2931,7 +2931,7 @@ typedef struct
     * stride - the number of components to leave space for in each row.
     *
     * WARNING: this macro overflows a 32-bit integer for some large PNG images,
-    * lib will refuse to process an image where such an overflow would occur.
+    * libpng will refuse to process an image where such an overflow would occur.
     */
 
 #define PNG_IMAGE_SIZE(image)\
@@ -3046,7 +3046,7 @@ PNG_EXPORT(237, int, png_image_finish_read, (png_imagep image,
     */
 
 PNG_EXPORT(238, void, png_image_free, (png_imagep image));
-   /* Free any data allocated by lib in image->opaque, setting the pointer to
+   /* Free any data allocated by libpng in image->opaque, setting the pointer to
     * NULL.  May be called at any time after the structure is initialized.
     */
 #endif /* SIMPLIFIED_READ */
@@ -3093,7 +3093,7 @@ PNG_EXPORT(240, int, png_image_write_to_stdio, (png_imagep image, FILE *file,
  * With all APIs row_stride is handled as in the read APIs - it is the spacing
  * from one row to the next in component sized units (1 or 2 bytes) and if
  * negative indicates a bottom-up row layout in the buffer.  If row_stride is
- * zero, lib will calculate it for you from the image width and number of
+ * zero, libpng will calculate it for you from the image width and number of
  * channels.
  *
  * Note that the write API does not support interlacing, sub-8-bit pixels or
@@ -3245,7 +3245,7 @@ PNG_EXPORT(244, int, png_set_option, (png_structrp png_ptr, int option,
  *  END OF HARDWARE AND SOFTWARE OPTIONS
  ******************************************************************************/
 
-/* Maintainer: Put new public prototypes here ^, in lib.3, in project
+/* Maintainer: Put new public prototypes here ^, in libpng.3, in project
  * defs, and in scripts/symbols.def.
  */
 

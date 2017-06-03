@@ -1,12 +1,12 @@
 
 /* pnginfo.h - header file for PNG reference library
  *
- * Last changed in lib 1.6.1 [March 28, 2013]
+ * Last changed in libpng 1.6.1 [March 28, 2013]
  * Copyright (c) 1998-2002,2004,2006-2013 Glenn Randers-Pehrson
  * (Version 0.96 Copyright (c) 1996, 1997 Andreas Dilger)
  * (Version 0.88 Copyright (c) 1995, 1996 Guy Eric Schalnat, Group 42, Inc.)
  *
- * This code is released under the lib license.
+ * This code is released under the libpng license.
  * For conditions of distribution and use, see the disclaimer
  * and license in png.h
  */
@@ -21,14 +21,14 @@
  * The names chosen should be very close to the PNG specification, so
  * consult that document for information about the meaning of each field.
  *
- * With lib < 0.95, it was only possible to directly set and read the
+ * With libpng < 0.95, it was only possible to directly set and read the
  * the values in the png_info_struct, which meant that the contents and
- * order of the values had to remain fixed.  With lib 0.95 and later,
+ * order of the values had to remain fixed.  With libpng 0.95 and later,
  * however, there are now functions that abstract the contents of
  * png_info_struct from the application, so this makes it easier to use
- * lib with dynamic libraries, and even makes it possible to use
- * libraries that don't have all of the lib ancillary chunk-handing
- * functionality.  In lib-1.5.0 this was moved into a separate private
+ * libpng with dynamic libraries, and even makes it possible to use
+ * libraries that don't have all of the libpng ancillary chunk-handing
+ * functionality.  In libpng-1.5.0 this was moved into a separate private
  * file that is not visible to applications.
  *
  * The following members may have allocated storage attached that should be
@@ -36,7 +36,7 @@
  * pcal_purpose, pcal_units, pcal_params, hist, iccp_name, iccp_profile,
  * splt_palettes, scal_unit, row_pointers, and unknowns.   By default, these
  * are automatically freed when the info structure is deallocated, if they were
- * allocated internally by lib.  This behavior can be changed by means
+ * allocated internally by libpng.  This behavior can be changed by means
  * of the png_data_freer() function.
  *
  * More allocation details: all the chunk-reading functions that

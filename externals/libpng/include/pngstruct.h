@@ -1,12 +1,12 @@
 
 /* pngstruct.h - header file for PNG reference library
  *
- * Last changed in lib 1.6.28 [January 5, 2017]
+ * Last changed in libpng 1.6.28 [January 5, 2017]
  * Copyright (c) 1998-2002,2004,2006-2017 Glenn Randers-Pehrson
  * (Version 0.96 Copyright (c) 1996, 1997 Andreas Dilger)
  * (Version 0.88 Copyright (c) 1995, 1996 Guy Eric Schalnat, Group 42, Inc.)
  *
- * This code is released under the lib license.
+ * This code is released under the libpng license.
  * For conditions of distribution and use, see the disclaimer
  * and license in png.h
  */
@@ -73,7 +73,7 @@ typedef struct png_compression_buffer
  *
  * PNG_COLORSPACE_SUPPORTED is only required if the application will perform
  * colorspace corrections, otherwise all the colorspace information can be
- * skipped and the size of lib can be reduced (significantly) by compiling
+ * skipped and the size of libpng can be reduced (significantly) by compiling
  * out the colorspace support.
  */
 #ifdef PNG_COLORSPACE_SUPPORTED
@@ -101,12 +101,12 @@ typedef struct png_XYZ
 
 #if defined(PNG_COLORSPACE_SUPPORTED) || defined(PNG_GAMMA_SUPPORTED)
 /* A colorspace is all the above plus, potentially, profile information;
- * however at present lib does not use the profile internally so it is only
+ * however at present libpng does not use the profile internally so it is only
  * stored in the png_info struct (if iCCP is supported.)  The rendering intent
  * is retained here and is checked.
  *
  * The file gamma encoding information is also stored here and gamma correction
- * is done by lib, whereas color correction must currently be done by the
+ * is done by libpng, whereas color correction must currently be done by the
  * application.
  */
 typedef struct png_colorspace
@@ -165,7 +165,7 @@ struct png_struct_def
    png_user_transform_ptr write_user_transform_fn; /* user write transform */
 #endif
 
-/* These were added in lib-1.0.2 */
+/* These were added in libpng-1.0.2 */
 #ifdef PNG_USER_TRANSFORM_PTR_SUPPORTED
 #if defined(PNG_READ_USER_TRANSFORM_SUPPORTED) || \
     defined(PNG_WRITE_USER_TRANSFORM_SUPPORTED)
@@ -176,7 +176,7 @@ struct png_struct_def
 #endif
 
    png_uint_32 mode;          /* tells us where we are in the PNG file */
-   png_uint_32 flags;         /* flags indicating various things to lib */
+   png_uint_32 flags;         /* flags indicating various things to libpng */
    png_uint_32 transformations; /* which transformations to perform */
 
    png_uint_32 zowner;        /* ID (chunk type) of zstream owner, 0 if none */
@@ -192,7 +192,7 @@ struct png_struct_def
    int zlib_mem_level;        /* holds zlib compression memory level */
    int zlib_strategy;         /* holds zlib compression strategy */
 #endif
-/* Added at lib 1.5.4 */
+/* Added at libpng 1.5.4 */
 #ifdef PNG_WRITE_CUSTOMIZE_ZTXT_COMPRESSION_SUPPORTED
    int zlib_text_level;            /* holds zlib compression level */
    int zlib_text_method;           /* holds zlib compression method */
@@ -200,8 +200,8 @@ struct png_struct_def
    int zlib_text_mem_level;        /* holds zlib compression memory level */
    int zlib_text_strategy;         /* holds zlib compression strategy */
 #endif
-/* End of material added at lib 1.5.4 */
-/* Added at lib 1.6.0 */
+/* End of material added at libpng 1.5.4 */
+/* Added at libpng 1.6.0 */
 #ifdef PNG_WRITE_SUPPORTED
    int zlib_set_level;        /* Actual values set into the zstream on write */
    int zlib_set_method;
@@ -239,7 +239,7 @@ struct png_struct_def
    png_colorp palette;        /* palette from the input file */
    png_uint_16 num_palette;   /* number of color entries in palette */
 
-/* Added at lib-1.5.10 */
+/* Added at libpng-1.5.10 */
 #ifdef PNG_CHECK_FOR_INVALID_INDEX_SUPPORTED
    int num_palette_max;       /* maximum palette index found in IDAT */
 #endif
@@ -357,15 +357,15 @@ struct png_struct_def
 #endif
 
 #if PNG_LIBPNG_VER < 10700
-/* To do: remove this from lib-1.7 */
+/* To do: remove this from libpng-1.7 */
 #ifdef PNG_TIME_RFC1123_SUPPORTED
    char time_buffer[29]; /* String to hold RFC 1123 time text */
 #endif
 #endif
 
-/* New members added in lib-1.0.6 */
+/* New members added in libpng-1.0.6 */
 
-   png_uint_32 free_me;    /* flags items lib is responsible for freeing */
+   png_uint_32 free_me;    /* flags items libpng is responsible for freeing */
 
 #ifdef PNG_USER_CHUNKS_SUPPORTED
    png_voidp user_chunk_ptr;
@@ -381,38 +381,38 @@ struct png_struct_def
                                   * followed by a PNG_HANDLE_* byte */
 #endif
 
-/* New members added in lib-1.0.3 */
+/* New members added in libpng-1.0.3 */
 #ifdef PNG_READ_RGB_TO_GRAY_SUPPORTED
    png_byte rgb_to_gray_status;
-   /* Added in lib 1.5.5 to record setting of coefficients: */
+   /* Added in libpng 1.5.5 to record setting of coefficients: */
    png_byte rgb_to_gray_coefficients_set;
-   /* These were changed from png_byte in lib-1.0.6 */
+   /* These were changed from png_byte in libpng-1.0.6 */
    png_uint_16 rgb_to_gray_red_coeff;
    png_uint_16 rgb_to_gray_green_coeff;
    /* deleted in 1.5.5: rgb_to_gray_blue_coeff; */
 #endif
 
-/* New member added in lib-1.0.4 (renamed in 1.0.9) */
+/* New member added in libpng-1.0.4 (renamed in 1.0.9) */
 #if defined(PNG_MNG_FEATURES_SUPPORTED)
 /* Changed from png_byte to png_uint_32 at version 1.2.0 */
    png_uint_32 mng_features_permitted;
 #endif
 
-/* New member added in lib-1.0.9, ifdef'ed out in 1.0.12, enabled in 1.2.0 */
+/* New member added in libpng-1.0.9, ifdef'ed out in 1.0.12, enabled in 1.2.0 */
 #ifdef PNG_MNG_FEATURES_SUPPORTED
    png_byte filter_type;
 #endif
 
-/* New members added in lib-1.2.0 */
+/* New members added in libpng-1.2.0 */
 
-/* New members added in lib-1.0.2 but first enabled by default in 1.2.0 */
+/* New members added in libpng-1.0.2 but first enabled by default in 1.2.0 */
 #ifdef PNG_USER_MEM_SUPPORTED
    png_voidp mem_ptr;             /* user supplied struct for mem functions */
    png_malloc_ptr malloc_fn;      /* function for allocating memory */
    png_free_ptr free_fn;          /* function for freeing memory */
 #endif
 
-/* New member added in lib-1.0.13 and 1.2.0 */
+/* New member added in libpng-1.0.13 and 1.2.0 */
    png_bytep big_row_buf;         /* buffer to save current (unfiltered) row */
 
 #ifdef PNG_READ_QUANTIZE_SUPPORTED
@@ -424,14 +424,14 @@ struct png_struct_def
                                          palette color */
 #endif
 
-/* New members added in lib-1.0.16 and 1.2.6 */
+/* New members added in libpng-1.0.16 and 1.2.6 */
    png_byte compression_type;
 
 #ifdef PNG_USER_LIMITS_SUPPORTED
    png_uint_32 user_width_max;
    png_uint_32 user_height_max;
 
-   /* Added in lib-1.4.0: Total number of sPLT, text, and unknown
+   /* Added in libpng-1.4.0: Total number of sPLT, text, and unknown
     * chunks that can be stored (0 means unlimited).
     */
    png_uint_32 user_chunk_cache_max;
@@ -442,7 +442,7 @@ struct png_struct_def
    png_alloc_size_t user_chunk_malloc_max;
 #endif
 
-/* New member added in lib-1.0.25 and 1.2.17 */
+/* New member added in libpng-1.0.25 and 1.2.17 */
 #ifdef PNG_READ_UNKNOWN_CHUNKS_SUPPORTED
    /* Temporary storage for unknown chunk that the library doesn't recognize,
     * used while reading the chunk.
@@ -450,11 +450,11 @@ struct png_struct_def
    png_unknown_chunk unknown_chunk;
 #endif
 
-/* New member added in lib-1.2.26 */
+/* New member added in libpng-1.2.26 */
   png_size_t old_big_row_buf_size;
 
 #ifdef PNG_READ_SUPPORTED
-/* New member added in lib-1.2.30 */
+/* New member added in libpng-1.2.30 */
   png_bytep        read_buffer;      /* buffer for reading chunk data */
   png_alloc_size_t read_buffer_size; /* current size of the buffer */
 #endif
@@ -463,14 +463,14 @@ struct png_struct_def
 #endif
 
 #ifdef PNG_IO_STATE_SUPPORTED
-/* New member added in lib-1.4.0 */
+/* New member added in libpng-1.4.0 */
    png_uint_32 io_state;
 #endif
 
-/* New member added in lib-1.5.6 */
+/* New member added in libpng-1.5.6 */
    png_bytep big_prev_row;
 
-/* New member added in lib-1.5.7 */
+/* New member added in libpng-1.5.7 */
    void (*read_filter[PNG_FILTER_VALUE_LAST-1])(png_row_infop row_info,
       png_bytep row, png_const_bytep prev_row);
 

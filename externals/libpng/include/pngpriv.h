@@ -1,22 +1,22 @@
 
-/* pngpriv.h - private declarations for use inside lib
+/* pngpriv.h - private declarations for use inside libpng
  *
- * Last changed in lib 1.6.29 [March 16, 2017]
+ * Last changed in libpng 1.6.29 [March 16, 2017]
  * Copyright (c) 1998-2002,2004,2006-2017 Glenn Randers-Pehrson
  * (Version 0.96 Copyright (c) 1996, 1997 Andreas Dilger)
  * (Version 0.88 Copyright (c) 1995, 1996 Guy Eric Schalnat, Group 42, Inc.)
  *
- * This code is released under the lib license.
+ * This code is released under the libpng license.
  * For conditions of distribution and use, see the disclaimer
  * and license in png.h
  */
 
 /* The symbols declared in this file (including the functions declared
- * as extern) are PRIVATE.  They are not part of the lib public
+ * as extern) are PRIVATE.  They are not part of the libpng public
  * interface, and are not recommended for use by regular applications.
  * Some of them may become public in the future; others may stay private,
  * change in an incompatible way, or even disappear.
- * Although the lib users are not forbidden to include this header,
+ * Although the libpng users are not forbidden to include this header,
  * they should be well aware of the issues that may arise from doing so.
  */
 
@@ -24,7 +24,7 @@
 #define PNGPRIV_H
 
 /* Feature Test Macros.  The following are defined here to ensure that correctly
- * implemented libraries reveal the APIs lib needs to build and hide those
+ * implemented libraries reveal the APIs libpng needs to build and hide those
  * that are not needed and potentially damaging to the compilation.
  *
  * Feature Test Macros must be defined before any system header is included (see
@@ -79,7 +79,7 @@
 #  include "pngusr.h"
    /* These should have been defined in pngusr.h */
 #  ifndef PNG_USER_PRIVATEBUILD
-#    define PNG_USER_PRIVATEBUILD "Custom lib build"
+#    define PNG_USER_PRIVATEBUILD "Custom libpng build"
 #  endif
 #  ifndef PNG_USER_DLLFNAME_POSTFIX
 #    define PNG_USER_DLLFNAME_POSTFIX "Cb"
@@ -102,7 +102,7 @@
  * regardless of $(CFLAGS) get declared in this file.  The test on __ARM_NEON__
  * below is one example of this behavior because it is controlled by the
  * presence or not of -mfpu=neon on the GCC command line, it is possible to do
- * this in $(CC), e.g. "CC=gcc -mfpu=neon", but people who build lib rarely
+ * this in $(CC), e.g. "CC=gcc -mfpu=neon", but people who build libpng rarely
  * do this.
  */
 #ifndef PNG_ARM_NEON_OPT
@@ -134,7 +134,7 @@
 #endif
 
 #if PNG_ARM_NEON_OPT > 0
-   /* NEON optimizations are to be at least considered by lib, so enable the
+   /* NEON optimizations are to be at least considered by libpng, so enable the
     * callbacks to do this.
     */
 #  define PNG_FILTER_OPTIMIZATIONS png_init_filter_functions_neon
@@ -149,14 +149,14 @@
     *
     * It is possible to set PNG_ARM_NEON_IMPLEMENTATION in CPPFLAGS, however
     * this is *NOT* supported and may cease to work even after a minor revision
-    * to lib.  It *is* valid to do this for testing purposes, e.g. speed
+    * to libpng.  It *is* valid to do this for testing purposes, e.g. speed
     * testing or a new compiler, but the results should be communicated to the
-    * lib implementation list for incorporation in the next minor release.
+    * libpng implementation list for incorporation in the next minor release.
     */
 #  ifndef PNG_ARM_NEON_IMPLEMENTATION
 #     if defined(__ARM_NEON__) || defined(__ARM_NEON)
 #        if defined(__clang__)
-            /* At present it is unknown by the lib developers which versions
+            /* At present it is unknown by the libpng developers which versions
              * of clang support the intrinsics, however some or perhaps all
              * versions do not work with the assembler so this may be
              * irrelevant, so just use the default (do nothing here.)
@@ -264,9 +264,9 @@
  * different preprocessor settings to those required for a simple library?  If
  * so PNG_BUILD_DLL must be set.
  *
- * If lib is used inside a DLL but that DLL does not export the lib APIs
+ * If libpng is used inside a DLL but that DLL does not export the libpng APIs
  * PNG_BUILD_DLL must not be set.  To avoid the code below kicking in build a
- * static library of lib then link the DLL against that.
+ * static library of libpng then link the DLL against that.
  */
 #ifndef PNG_BUILD_DLL
 #  ifdef DLL_EXPORT
@@ -397,16 +397,16 @@
 
 /* SECURITY and SAFETY:
  *
- * lib is built with support for internal limits on image dimensions and
+ * libpng is built with support for internal limits on image dimensions and
  * memory usage.  These are documented in scripts/pnglibconf.dfa of the
  * source and recorded in the machine generated header file pnglibconf.h.
  */
 
 /* If you are running on a machine where you cannot allocate more
- * than 64K of memory at once, uncomment this.  While lib will not
+ * than 64K of memory at once, uncomment this.  While libpng will not
  * normally need that much memory in a chunk (unless you load up a very
  * large file), zlib needs to know how big of a chunk it can use, and
- * lib thus makes sure to check any memory allocation to verify it
+ * libpng thus makes sure to check any memory allocation to verify it
  * will fit into memory.
  *
  * zlib provides 'MAXSEG_64K' which, if defined, indicates the
@@ -592,7 +592,7 @@
 /* End of 1.5.0beta36 move from pngconf.h */
 
 /* CONSTANTS and UTILITY MACROS
- * These are used internally by lib and not exposed in the API
+ * These are used internally by libpng and not exposed in the API
  */
 
 /* Various modes of operation.  Note that after an init, mode is set to
@@ -702,7 +702,7 @@
    abs((int)((c1).green) - (int)((c2).green)) + \
    abs((int)((c1).blue) - (int)((c2).blue)))
 
-/* Added to lib-1.6.0: scale a 16-bit value in the range 0..65535 to 0..255
+/* Added to libpng-1.6.0: scale a 16-bit value in the range 0..65535 to 0..255
  * by dividing by 257 *with rounding*.  This macro is exact for the given range.
  * See the discourse in pngrtran.c png_do_scale_16_to_8.  The values in the
  * macro were established by experiment (modifying the added value).  The macro
@@ -713,7 +713,7 @@
 #define PNG_DIV65535(v24) (((v24) + 32895) >> 16)
 #define PNG_DIV257(v16) PNG_DIV65535((png_uint_32)(v16) * 255)
 
-/* Added to lib-1.2.6 JB */
+/* Added to libpng-1.2.6 JB */
 #define PNG_ROWBYTES(pixel_bits, width) \
     ((pixel_bits) >= 8 ? \
     ((png_size_t)(width) * (((png_size_t)(pixel_bits)) >> 3)) : \
@@ -740,7 +740,7 @@
 /* PNG_OUT_OF_RANGE returns true if value is outside the range
  * ideal-delta..ideal+delta.  Each argument is evaluated twice.
  * "ideal" and "delta" should be constants, normally simple
- * integers, "value" a variable. Added to lib-1.2.6 JB
+ * integers, "value" a variable. Added to libpng-1.2.6 JB
  */
 #define PNG_OUT_OF_RANGE(value, ideal, delta) \
    ( (value) < (ideal)-(delta) || (value) > (ideal)+(delta) )
@@ -816,7 +816,7 @@
  * can be examined far more efficiently (using one arithmetic compare).
  *
  * Prior to 1.5.6 the chunk type constants were expressed as C strings.  The
- * lib API still uses strings for 'unknown' chunks and a macro,
+ * libpng API still uses strings for 'unknown' chunks and a macro,
  * PNG_STRING_FROM_CHUNK, allows a string to be generated if required.  Notice
  * that for portable code numeric values must still be used; the string "IHDR"
  * is not portable and neither is PNG_U32('I', 'H', 'D', 'R').
@@ -878,7 +878,7 @@
 #define PNG_CHUNK_RESERVED(c)     (1 & ((c) >> 13))
 #define PNG_CHUNK_SAFE_TO_COPY(c) (1 & ((c) >>  5))
 
-/* Gamma values (new at lib-1.5.4): */
+/* Gamma values (new at libpng-1.5.4): */
 #define PNG_GAMMA_MAC_OLD 151724  /* Assume '1.8' is really 2.2/1.45! */
 #define PNG_GAMMA_MAC_INVERSE 65909
 #define PNG_GAMMA_sRGB_INVERSE 45455
@@ -899,7 +899,7 @@
       "-I (include path) error: see the notes in pngpriv.h"
    /* This means that when pnglibconf.h was built the copy of zlib.h that it
     * used is not the same as the one being used here.  Because the build of
-    * lib makes decisions to use inflateInit2 and inflateReset2 based on the
+    * libpng makes decisions to use inflateInit2 and inflateReset2 based on the
     * zlib version number and because this affects handling of certain broken
     * PNG files the -I directives must match.
     *
@@ -914,7 +914,7 @@
  */
 typedef const png_uint_16p * png_const_uint_16pp;
 
-/* Added to lib-1.5.7: sRGB conversion tables */
+/* Added to libpng-1.5.7: sRGB conversion tables */
 #if defined(PNG_SIMPLIFIED_READ_SUPPORTED) ||\
    defined(PNG_SIMPLIFIED_WRITE_SUPPORTED)
 #ifdef PNG_SIMPLIFIED_READ_SUPPORTED
@@ -936,7 +936,7 @@ PNG_INTERNAL_DATA(const png_byte, png_sRGB_delta, [512]);
 #endif /* SIMPLIFIED_READ/WRITE */
 
 
-/* Inhibit C++ name-mangling for lib functions but not for system calls. */
+/* Inhibit C++ name-mangling for libpng functions but not for system calls. */
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -1005,7 +1005,7 @@ PNG_INTERNAL_FUNCTION(png_voidp,png_realloc_array,(png_const_structrp png_ptr,
 /* Magic to create a struct when there is no struct to call the user supplied
  * memory allocators.  Because error handling has not been set up the memory
  * handlers can't safely call png_error, but this is an obscure and undocumented
- * restriction so lib has to assume that the 'free' handler, at least, might
+ * restriction so libpng has to assume that the 'free' handler, at least, might
  * call png_error.
  */
 PNG_INTERNAL_FUNCTION(png_structp,png_create_png_struct,
@@ -1013,7 +1013,7 @@ PNG_INTERNAL_FUNCTION(png_structp,png_create_png_struct,
     png_error_ptr warn_fn, png_voidp mem_ptr, png_malloc_ptr malloc_fn,
     png_free_ptr free_fn),PNG_ALLOCATED);
 
-/* Free memory from internal lib struct */
+/* Free memory from internal libpng struct */
 PNG_INTERNAL_FUNCTION(void,png_destroy_png_struct,(png_structrp png_ptr),
    PNG_EMPTY);
 
@@ -1028,7 +1028,7 @@ PNG_INTERNAL_FUNCTION(voidpf,png_zalloc,(voidpf png_ptr, uInt items, uInt size),
 PNG_INTERNAL_FUNCTION(void,png_zfree,(voidpf png_ptr, voidpf ptr),PNG_EMPTY);
 
 /* Next four functions are used internally as callbacks.  PNGCBAPI is required
- * but not PNG_EXPORT.  PNGAPI added at lib version 1.2.3, changed to
+ * but not PNG_EXPORT.  PNGAPI added at libpng version 1.2.3, changed to
  * PNGCBAPI at 1.5.0
  */
 
@@ -1077,7 +1077,7 @@ PNG_INTERNAL_FUNCTION(void,png_crc_read,(png_structrp png_ptr, png_bytep buf,
 PNG_INTERNAL_FUNCTION(int,png_crc_finish,(png_structrp png_ptr,
    png_uint_32 skip),PNG_EMPTY);
 
-/* Read the CRC from the file and compare it to the lib calculated CRC */
+/* Read the CRC from the file and compare it to the libpng calculated CRC */
 PNG_INTERNAL_FUNCTION(int,png_crc_error,(png_structrp png_ptr),PNG_EMPTY);
 
 /* Calculate the CRC over a section of data.  Note that we are only
@@ -1233,7 +1233,7 @@ PNG_INTERNAL_FUNCTION(void,png_write_start_row,(png_structrp png_ptr),
  * it is full width (png_do_read_interlace has already been called.)
  *
  * This function is only ever used to write to row buffers provided by the
- * caller of the relevant lib API and the row must have already been
+ * caller of the relevant libpng API and the row must have already been
  * transformed by the read transformations.
  *
  * The PNG_USE_COMPILE_TIME_MASKS option causes generation of pre-computed
@@ -1589,7 +1589,7 @@ PNG_INTERNAL_FUNCTION(void,png_push_read_iTXt,(png_structrp png_ptr,
 
 #endif /* PROGRESSIVE_READ */
 
-/* Added at lib version 1.6.0 */
+/* Added at libpng version 1.6.0 */
 #ifdef PNG_GAMMA_SUPPORTED
 PNG_INTERNAL_FUNCTION(void,png_colorspace_set_gamma,(png_const_structrp png_ptr,
     png_colorspacerp colorspace, png_fixed_point gAMA), PNG_EMPTY);
@@ -1609,7 +1609,7 @@ PNG_INTERNAL_FUNCTION(void,png_colorspace_sync,(png_const_structrp png_ptr,
     */
 #endif
 
-/* Added at lib version 1.4.0 */
+/* Added at libpng version 1.4.0 */
 #ifdef PNG_COLORSPACE_SUPPORTED
 /* These internal functions are for maintaining the colorspace structure within
  * a png_info or png_struct (or, indeed, both).
@@ -1672,13 +1672,13 @@ PNG_INTERNAL_FUNCTION(void,png_colorspace_set_rgb_coefficients,
 #endif /* READ_RGB_TO_GRAY */
 #endif /* COLORSPACE */
 
-/* Added at lib version 1.4.0 */
+/* Added at libpng version 1.4.0 */
 PNG_INTERNAL_FUNCTION(void,png_check_IHDR,(png_const_structrp png_ptr,
     png_uint_32 width, png_uint_32 height, int bit_depth,
     int color_type, int interlace_type, int compression_type,
     int filter_type),PNG_EMPTY);
 
-/* Added at lib version 1.5.10 */
+/* Added at libpng version 1.5.10 */
 #if defined(PNG_READ_CHECK_FOR_INVALID_INDEX_SUPPORTED) || \
     defined(PNG_WRITE_CHECK_FOR_INVALID_INDEX_SUPPORTED)
 PNG_INTERNAL_FUNCTION(void,png_do_check_palette_indexes,
@@ -1729,7 +1729,7 @@ PNG_INTERNAL_FUNCTION(png_charp,png_format_number,(png_const_charp start,
 #endif
 
 #ifdef PNG_WARNINGS_SUPPORTED
-/* New defines and members adding in lib-1.5.4 */
+/* New defines and members adding in libpng-1.5.4 */
 #  define PNG_WARNING_PARAMETER_SIZE 32
 #  define PNG_WARNING_PARAMETER_COUNT 8 /* Maximum 9; see pngerror.c */
 
@@ -1780,12 +1780,12 @@ PNG_INTERNAL_FUNCTION(void,png_formatted_warning,(png_const_structrp png_ptr,
 PNG_INTERNAL_FUNCTION(void,png_app_warning,(png_const_structrp png_ptr,
    png_const_charp message),PNG_EMPTY);
    /* The application provided invalid parameters to an API function or called
-    * an API function at the wrong time, lib can completely recover.
+    * an API function at the wrong time, libpng can completely recover.
     */
 
 PNG_INTERNAL_FUNCTION(void,png_app_error,(png_const_structrp png_ptr,
    png_const_charp message),PNG_EMPTY);
-   /* As above but lib will ignore the call, or attempt some other partial
+   /* As above but libpng will ignore the call, or attempt some other partial
     * recovery from the error.
     */
 #else
@@ -1917,7 +1917,7 @@ PNG_INTERNAL_FUNCTION(void,png_ascii_from_fixed,(png_const_structrp png_ptr,
  * a valid number.  It's possible to recover from this by calling
  * the parser again (from the start, with state 0) but with a string
  * that omits the last character (i.e. set the size to the index of
- * the problem character.)  This has not been tested within lib.
+ * the problem character.)  This has not been tested within libpng.
  */
 PNG_INTERNAL_FUNCTION(int,png_check_fp_number,(png_const_charp string,
    png_size_t size, int *statep, png_size_tp whereami),PNG_EMPTY);
@@ -1934,7 +1934,7 @@ PNG_INTERNAL_FUNCTION(int,png_check_fp_string,(png_const_charp string,
 
 #if defined(PNG_GAMMA_SUPPORTED) ||\
     defined(PNG_INCH_CONVERSIONS_SUPPORTED) || defined(PNG_READ_pHYs_SUPPORTED)
-/* Added at lib version 1.5.0 */
+/* Added at libpng version 1.5.0 */
 /* This is a utility to provide a*times/div (rounded) and indicate
  * if there is an overflow.  The result is a boolean - false (0)
  * for overflow, true (1) if no overflow, in which case *res
@@ -2019,7 +2019,7 @@ typedef struct png_control
 #  define png_control_jmp_buf(pc) ((pc)->error_buf)
 #endif
 
-/* Utility to safely execute a piece of lib code catching and logging any
+/* Utility to safely execute a piece of libpng code catching and logging any
  * errors that might occur.  Returns true on success, false on failure (either
  * of the function or as a result of a png_error.)
  */
@@ -2060,7 +2060,7 @@ PNG_INTERNAL_FUNCTION(void, PNG_FILTER_OPTIMIZATIONS, (png_structp png_ptr,
    /* Just declare the optimization that will be used */
 #else
    /* List *all* the possible optimizations here - this branch is required if
-    * the builder of lib passes the definition of PNG_FILTER_OPTIMIZATIONS in
+    * the builder of libpng passes the definition of PNG_FILTER_OPTIMIZATIONS in
     * CFLAGS in place of CPPFLAGS *and* uses symbol prefixing.
     */
 #  if PNG_ARM_NEON_OPT > 0

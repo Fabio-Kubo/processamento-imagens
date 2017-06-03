@@ -1,18 +1,18 @@
 
-/* pngconf.h - machine configurable file for lib
+/* pngconf.h - machine configurable file for libpng
  *
- * lib version 1.6.29, March 16, 2017
+ * libpng version 1.6.29, March 16, 2017
  *
  * Copyright (c) 1998-2002,2004,2006-2016 Glenn Randers-Pehrson
  * (Version 0.96 Copyright (c) 1996, 1997 Andreas Dilger)
  * (Version 0.88 Copyright (c) 1995, 1996 Guy Eric Schalnat, Group 42, Inc.)
  *
- * This code is released under the lib license.
+ * This code is released under the libpng license.
  * For conditions of distribution and use, see the disclaimer
  * and license in png.h
  *
  * Any machine specific code is near the front of this file, so if you
- * are configuring lib for a machine, you may want to read the section
+ * are configuring libpng for a machine, you may want to read the section
  * starting here down to where it starts to typedef png_color, png_text,
  * and png_info.
  */
@@ -22,7 +22,7 @@
 
 #ifndef PNG_BUILDING_SYMBOL_TABLE /* else includes may cause problems */
 
-/* From lib 1.6.0 lib requires an ANSI X3.159-1989 ("ISOC90") compliant C
+/* From libpng 1.6.0 libpng requires an ANSI X3.159-1989 ("ISOC90") compliant C
  * compiler for correct compilation.  The following header files are required by
  * the standard.  If your compiler doesn't provide these header files, or they
  * do not match the standard, you will need to provide/improve them.
@@ -30,10 +30,10 @@
 #include <limits.h>
 #include <stddef.h>
 
-/* Library header files.  These header files are all defined by ISOC90; lib
+/* Library header files.  These header files are all defined by ISOC90; libpng
  * expects conformant implementations, however, an ISOC90 conformant system need
  * not provide these header files if the functionality cannot be implemented.
- * In this case it will be necessary to disable the relevant parts of lib in
+ * In this case it will be necessary to disable the relevant parts of libpng in
  * the build of pnglibconf.h.
  *
  * Prior to 1.6.0 string.h was included here; the API changes in 1.6.0 to not
@@ -101,7 +101,7 @@
  * Microsoft and Borland C compilers ('IBM PC', 'DOS', 'Windows' systems
  * and some others) there are multiple ways to call a function and the
  * default can be changed on the compiler command line.  For this reason
- * lib specifies the calling convention of every exported function and
+ * libpng specifies the calling convention of every exported function and
  * every function called via a user supplied function pointer.  This is
  * done in this file by defining the following macros:
  *
@@ -123,7 +123,7 @@
  *                callbacks (PNGCBAPI).  This is no longer required
  *                in any known environment - if it has to be used
  *                please post an explanation of the problem to the
- *                lib mailing list.
+ *                libpng mailing list.
  *
  * These cases only differ if the operating system does not use the C
  * calling convention, at present this just means the above cases
@@ -162,12 +162,12 @@
  * PNG_EXPORT_TYPE(type) A macro that pre or appends PNG_IMPEXP to
  *                       'type', compiler specific.
  *
- * PNG_DLL_EXPORT Set to the magic to use during a lib build to
+ * PNG_DLL_EXPORT Set to the magic to use during a libpng build to
  *                make a symbol exported from the DLL.  Not used in the
  *                public header files; see pngpriv.h for how it is used
- *                in the lib build.
+ *                in the libpng build.
  *
- * PNG_DLL_IMPORT Set to the magic to force the lib symbols to come
+ * PNG_DLL_IMPORT Set to the magic to force the libpng symbols to come
  *                from a DLL - used to define PNG_IMPEXP when
  *                PNG_USE_DLL is set.
  */
@@ -556,13 +556,13 @@ typedef ptrdiff_t png_ptrdiff_t;
    typedef png_size_t png_alloc_size_t;
 #endif
 
-/* Prior to 1.6.0 lib offered limited support for Microsoft C compiler
+/* Prior to 1.6.0 libpng offered limited support for Microsoft C compiler
  * implementations of Intel CPU specific support of user-mode segmented address
  * spaces, where 16-bit pointers address more than 65536 bytes of memory using
  * separate 'segment' registers.  The implementation requires two different
  * types of pointer (only one of which includes the segment value.)
  *
- * If required this support is available in version 1.2 of lib and may be
+ * If required this support is available in version 1.2 of libpng and may be
  * available in versions through 1.5, although the correctness of the code has
  * not been verified recently.
  */
