@@ -148,6 +148,25 @@ FeatureMatrix* kMeansClustering(FeatureMatrix* featureMatrix, int numberOfCluste
     return dict;
 }
 
+Matrix* kMeansConvert(Matrix* matriz, BagOfVisualWordsManager *bagOfVisualWordsManager) {
+    FeatureMatrix* featureMatrix = createFeatureMatrix(matriz->numberRows, matriz->numberColumns);
+    for (int i = 0; i < matriz->numberRows; i++) {
+        for (int j = 0; j < matriz->numberColumns; j++) {
+            featureMatrix->featureVector[i]->features[j] = MATRIX_GET_ELEMENT_PO_AS(float, matriz, i, j);
+        }
+    }
+    int nClusters = ARGLIST_GET_ELEMENT_AS(int, bagOfVisualWordsManager->argumentListOfClustering, 0);
+    FeatureMatrix* output = kMeansClustering(featureMatrix, nClusters);
+    Matrix* outputMatrix = createMatrix(output->featureVectors, output->featureVector[0]->size, sizeof(float));
+    for (int i = 0; i < output->nFeaturesVectors; i++) {
+        for (int j = 0; j < output->featureVector[0]->size; j++) {
+           MATRIX_GET_ELEMENT_PO_AS(float, outputMatrix, i, j) = output->featureVector[i]->features[j];
+        }
+    }
+
+    return outputMatrix;
+}
+
 FeatureMatrix * computeClusters(FeatureMatrix* matrixWordHistogram, int * labels, vector< vector<int> > controleWordHistogramLabel, int numberOfCluster){
     int i, j, k, currentCentroid;
     float currentDistance, maxDistance;
