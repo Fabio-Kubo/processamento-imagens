@@ -37,10 +37,10 @@ typedef Matrix* (*ClusteringFunction)(Matrix* outputFeatureExtractor_allSamples,
 typedef GVector* (*MountHistogramFunction) (Matrix* outputFeatureExtractor_singleSample,BagOfVisualWordsManager* bagOfVisualWordsManager);
 
 typedef struct _bagOfVisualWordsManager {
-        GVector* pathsToImages_dictionery;
+        GVector* pathsToImages_dictionary;
         GVector* pathsToImages_train;
         GVector* pathsToImages_test;
-        Matrix* dictionery;
+        Matrix* dictionary;
 
         Matrix* histogramsTraining;
         GVector* labelsTraining;

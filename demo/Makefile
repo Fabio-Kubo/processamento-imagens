@@ -10,7 +10,7 @@ FLLIBJPEGINCLUDES = -I../externals/libjpeg/include
 FLLIBTIFFINCLUDES = -I../externals/libtiff/include
 FLLIBSVMINCLUDES = -I../externals/libsvm/include
 
-FL = -L../lib -lFL
+FL = -L../lib -lFL -lift -llapack -lblas -lpng -lz -fopenmp -lm
 LINKER =  $(FL)
 
 FLFLAGS  = -I../include

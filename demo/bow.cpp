@@ -1,14 +1,20 @@
 #include "FL.h"
+#include "flToIft.cpp"
+
+#define N_SUPER_PIXELS 150;
+#define N_VISUAL_WORDS 500;
+#define ALPHA 0.12;
+#define BETA 12;
+#define N_ITERATIONS 10;
+#define N_SMOOTH_ITERATIONS 0;
+
 
 int main(int argc, char **argv) {
-    size_t numberOfVisualWords = 500;
-
-
     //Caminhos onde esta o arquivo txt gerado pelo o script python "selec_samples2.py"
     //os caminhos vao mudar para cada pessoa
-    char const* const fileName_createDict = "/home/deangeli/databases/train_paths.txt";
-    char const* const fileName_createTrain = "/home/deangeli/databases/train_paths.txt";
-    char const* const fileName_createTest = "/home/deangeli/databases/test_paths.txt";
+    char const* const fileName_createDict = "../train_paths.txt";
+    char const* const fileName_createTrain = "../train_paths.txt";
+    char const* const fileName_createTest = "../test_paths.txt";
 
     //cada posicao do vetor tem uma string para o caminho de uma imagem
     GVector* vectorSamplesUsed2CreateDict =  splitsLinesInTextFile(fileName_createDict);
@@ -40,7 +46,7 @@ int main(int argc, char **argv) {
 
     ////////////////////////////////////////////////////////////////////////
     //Passando os vetores que contem os caminhos das imagens para...
-    bowManager->pathsToImages_dictionery = vectorSamplesUsed2CreateDict;//criar o dicionario
+    bowManager->pathsToImages_dictionary = vectorSamplesUsed2CreateDict;//criar o dicionario
     bowManager->pathsToImages_train = vectorSamplesUsed2TrainClassifier;//treinar o classificador
     bowManager->pathsToImages_test = vectorSamplesUsed2TestClassifier;//testar o classificador
     //////////////////////////////////////////////////////////////////////
@@ -48,15 +54,18 @@ int main(int argc, char **argv) {
     //////////////////////////////////////////////////////////////////////
     //metodo de sampling que vai ser usado para criar os patchs. Se vc passar NULL aqui o estrutura
     // do bow vai criar um vetor de tamanho 1 onde o unico elemento desse vetor vai ser a imagem.
-    bowManager->imageSamplerFunction = gridSamplingBow;//ponteiro da funcao para o sampling
+    bowManager->imageSamplerFunction = superPixelSamplingBow;//ponteiro da funcao para o sampling
 
     //Nesta demo o metodo de sampling  usado é o grid. Entao eu vou criar um argument list
     //para colocar os parametros do metodo de grinding que eu fiz.
     //Note que o cabecalho geral para a funcao de sammpling e
     //GVector* minhaFuncaoDeSampling(Image* image, BagOfVisualWordsManager* bagOfVisualWordsManager);
     ArgumentList* gridSamplingArguments = createArgumentList();
-    ARGLIST_PUSH_BACK_AS(size_t,gridSamplingArguments,64); //patch size X
-    ARGLIST_PUSH_BACK_AS(size_t,gridSamplingArguments,64); //patch size Y
+    ARGLIST_PUSH_BACK_AS(size_t, gridSamplingArguments, N_SUPER_PIXELS);
+    ARGLIST_PUSH_BACK_AS(size_t, gridSamplingArguments, ALPHA);
+    ARGLIST_PUSH_BACK_AS(size_t, gridSamplingArguments, BETA);
+    ARGLIST_PUSH_BACK_AS(size_t, gridSamplingArguments, N_ITERATIONS);
+    ARGLIST_PUSH_BACK_AS(size_t, gridSamplingArguments, N_SMOOTH_ITERATIONS);
     bowManager->argumentListOfSampler = gridSamplingArguments;//passando a lista de argumentos para o bow manager
     //////////////////////////////////////////////////////////
 
@@ -106,7 +115,7 @@ int main(int argc, char **argv) {
     //typedef Matrix* minhaFuncaoDeClustering(Matrix* outputFeatureExtractor_allSamples, BagOfVisualWordsManager* bagOfVisualWordsManager);
     bowManager->clusteringFunction = kmeansClusteringBow;
     ArgumentList* clusteringMethodArguments = createArgumentList();
-    ARGLIST_PUSH_BACK_AS(size_t,clusteringMethodArguments,numberOfVisualWords); //number of words
+    ARGLIST_PUSH_BACK_AS(size_t,clusteringMethodArguments,N_VISUAL_WORDS); //number of words
     ARGLIST_PUSH_BACK_AS(size_t,clusteringMethodArguments,100); //maximum number of iterations
     ARGLIST_PUSH_BACK_AS(double,clusteringMethodArguments,0.0001); //tolerance
     ARGLIST_PUSH_BACK_AS(int,clusteringMethodArguments,0); //seed
@@ -117,7 +126,7 @@ int main(int argc, char **argv) {
 
     ////////////
     //computa o dicionario
-    computeDictionery(bowManager);
+    computeDictionary(bowManager);
     /////////////
 
     //////////////////////
