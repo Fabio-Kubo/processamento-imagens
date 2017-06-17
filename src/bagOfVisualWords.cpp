@@ -133,9 +133,9 @@ void computeDictionary(BagOfVisualWordsManager* bagOfVisualWordsManager){
         return;
     }
 
-    printf("[computeDictionery] Generating visual words...\n");
-    for (size_t i = 0; i < bagOfVisualWordsManager->pathsToImages_dictionery->size; ++i) {
-        char* imagePath = VECTOR_GET_ELEMENT_AS(char*,bagOfVisualWordsManager->pathsToImages_dictionery,i);
+    printf("[computeDictionary] Generating visual words...\n");
+    for (size_t i = 0; i < bagOfVisualWordsManager->pathsToImages_dictionary->size; ++i) {
+        char* imagePath = VECTOR_GET_ELEMENT_AS(char*,bagOfVisualWordsManager->pathsToImages_dictionary,i);
         Image* image = readImage(imagePath);
         if(image == NULL){
             printf("[computeDictionary] invalid image path: %s",imagePath);
@@ -164,7 +164,7 @@ void computeDictionary(BagOfVisualWordsManager* bagOfVisualWordsManager){
     bagOfVisualWordsManager->dictionary = bagOfVisualWordsManager->clusteringFunction(allFeatures,
                                                 bagOfVisualWordsManager);
     destroyMatrix(&allFeatures);
-    printf("[computeDictionary] Dictioney computed\n");
+    printf("[computeDictionary] Dictionary computed\n");
 }
 
 void trainClassifier(BagOfVisualWordsManager* bagOfVisualWordsManager){

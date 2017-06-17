@@ -88,7 +88,7 @@ GVector* computeCountHistogram_bow(Matrix* featureMatrix,BagOfVisualWordsManager
 
 
 
-void computeDictionery(BagOfVisualWordsManager* bagOfVisualWordsManager);
+void computeDictionary(BagOfVisualWordsManager* bagOfVisualWordsManager);
 void trainClassifier(BagOfVisualWordsManager* bagOfVisualWordsManager);
 GVector* predictLabels(BagOfVisualWordsManager* bagOfVisualWordsManager);
 
