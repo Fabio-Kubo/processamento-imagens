@@ -13,7 +13,7 @@ Mat * convertImageToHogImage(Image image){
     //TODO converter image to Mat * e aplicar ao final o metodo abaixo
     //images_blocks[i].convertTo(images_blocks[i], CV_32F, 1/255.0);
 
-    return null;
+    return NULL;
 }
 
 /*
@@ -32,8 +32,8 @@ Mat * calculateHog(HogManager * hogManager) {
 
             // Calculate gradients gx, gy by using image 1-derivative x and y direction
             Mat gx, gy;
-            Sobel(images_blocks[i], gx, CV_32F, 1, 0, 1);
-            Sobel(images_blocks[i], gy, CV_32F, 0, 1, 1);
+            Sobel(*current_cell, gx, CV_32F, 1, 0, 1);
+            Sobel(*current_cell, gy, CV_32F, 0, 1, 1);
 
             //Calculate gradient magnitude and direction (in degrees)
             Mat magnitude, angle;
@@ -43,13 +43,13 @@ Mat * calculateHog(HogManager * hogManager) {
             for (int cell_x = 0; cell_x < current_cell->rows; cell_x++) {
                 for (int cell_y = 0; cell_y < current_cell->cols; cell_y++) {
 
-                    int floor_angle_index = (int) angle.at<float>(m,n) / 20.0;
-                    float floor_weigth = (angle.at<float>(m,n) - floor_angle_index * 20) / 20;
+                    int floor_angle_index = (int) angle.at<float>(cell_x, cell_y) / 20.0;
+                    float floor_weigth = (angle.at<float>(cell_x, cell_y) - floor_angle_index * 20) / 20;
                     float ceiling_weigth = 1 - floor_weigth;
 
                     histogram->at<float>(blockIndex, cell_histogram_base_index + floor_angle_index) += floor_weigth * magnitude.at<float>(cell_x, cell_y);
 
-                    if(floor_angule_index != 8){
+                    if(floor_angle_index != 8){
                         histogram->at<float>(blockIndex, cell_histogram_base_index + floor_angle_index + 1) += ceiling_weigth * magnitude.at<float>(cell_x, cell_y);
                     }
                 }
