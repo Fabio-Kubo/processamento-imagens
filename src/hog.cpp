@@ -4,41 +4,55 @@
 #include <iostream>
 #include <ostream>
 
+#include "hog.h"
+
 using namespace cv;
 
-Mat * calculateHog(std::vector<Mat> images_blocks) {
+Mat * convertImageToHogImage(Image image){
+    //TODO converter image to Mat * e aplicar ao final o metodo abaixo
+    //images_blocks[i].convertTo(images_blocks[i], CV_32F, 1/255.0);
 
-    Mat * histogram = new Mat(images_blocks.size(), 9, CV_32F);
+    return null;
+}
 
-    for (int i = 0; i < images_blocks.size(); i++) {
-        images_blocks[i].convertTo(images_blocks[i], CV_32F, 1/255.0);
+/*
+Each image should be a Mat instance with float between 0-1 values (CV-32F)
+*/
+Mat * calculateHog(HogManager * hogManager) {
 
-        // Calculate gradients gx, gy
-        Mat gx, gy;
+    Mat * histogram = new Mat( hogManager->blocks.size(), hogManager->numberOfCellsPerBlock * 9, CV_32F);
 
-        //calculates image 1-derivative x
-        Sobel(images_blocks[i], gx, CV_32F, 1, 0, 1);
+    for (int blockIndex = 0; blockIndex < hogManager->blocks.size(); blockIndex++) {
+        for (int cellIndex = 0; cellIndex < hogManager->numberOfCellsPerBlock; cellIndex++) {
 
-        //calculates image 1-derivative y
-        Sobel(images_blocks[i], gy, CV_32F, 0, 1, 1);
+            //get current cell
+            Mat * current_cell = &(hogManager->blocks[blockIndex].cells[cellIndex]);
+            int cell_histogram_base_index = cellIndex * 9;
 
-        //Calculate gradient magnitude and direction (in degrees)
-        Mat magnitude, angle;
-        cartToPolar(gx, gy, magnitude, angle, 1);
+            // Calculate gradients gx, gy by using image 1-derivative x and y direction
+            Mat gx, gy;
+            Sobel(images_blocks[i], gx, CV_32F, 1, 0, 1);
+            Sobel(images_blocks[i], gy, CV_32F, 0, 1, 1);
 
-        for (int m = 0; m < images_blocks[i].rows; m++) {
-          for (int n = 0; n < images_blocks[i].cols; n++) {
+            //Calculate gradient magnitude and direction (in degrees)
+            Mat magnitude, angle;
+            cartToPolar(gx, gy, magnitude, angle, 1);
 
-              int floor_angule_index = (int) angle.at<float>(m,n) / 20.0;
-              float floor_weigth = (angle.at<float>(m,n) - floor_angule_index * 20) / 20;
-              float ceiling_weigth = 1 - floor_weigth;
+            // for each pixel, updates values in histogram
+            for (int cell_x = 0; cell_x < current_cell->rows; cell_x++) {
+                for (int cell_y = 0; cell_y < current_cell->cols; cell_y++) {
 
-              histogram->at<float>(i,floor_angule_index) += floor_weigth * magnitude.at<float>(m,n);
+                    int floor_angle_index = (int) angle.at<float>(m,n) / 20.0;
+                    float floor_weigth = (angle.at<float>(m,n) - floor_angle_index * 20) / 20;
+                    float ceiling_weigth = 1 - floor_weigth;
 
-              if(floor_angule_index != 8){
-                  histogram->at<float>(i,floor_angule_index + 1) += ceiling_weigth * magnitude.at<float>(m,n);
-              }
-          }
+                    histogram->at<float>(blockIndex, cell_histogram_base_index + floor_angule_index) += floor_weigth * magnitude.at<float>(cell_x, cell_y);
+
+                    if(floor_angule_index != 8){
+                        histogram->at<float>(blockIndex, cell_histogram_base_index + floor_angule_index + 1) += ceiling_weigth * magnitude.at<float>(cell_x, cell_y);
+                    }
+                }
+            }
         }
     }
 
@@ -54,10 +68,10 @@ int main(int argc, char** argv )
     images.push_back(imread("data/obj2.png"));
     images.push_back(imread("data/obj3.png"));
 
-    Mat * histogram = calculateHog(images);
+    //Mat * histogram = calculateHog(images);
 
     //print Mat content
-    std::cout << "M = "<< std::endl << " "  << *histogram << std::endl << std::endl;
+    //std::cout << "M = "<< std::endl << " "  << *histogram << std::endl << std::endl;
 
     return 0;
 }
