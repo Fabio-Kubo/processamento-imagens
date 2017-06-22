@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
 
+using namespace cv;
+
 typedef struct Block {
-    std::vector<Mat*> cells;
+    std::vector<Mat> cells;
 } Block;
 
-typdef struct HogManager{
-    std::vector<Blocks> blocks;
+typedef struct HogManager{
+    std::vector<Block> blocks;
     int numberOfCellsPerBlock;
 } HogManager;

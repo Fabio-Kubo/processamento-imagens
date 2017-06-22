@@ -5,6 +5,7 @@
 #include <ostream>
 
 #include "hog.h"
+#include "image.h"
 
 using namespace cv;
 
@@ -46,10 +47,10 @@ Mat * calculateHog(HogManager * hogManager) {
                     float floor_weigth = (angle.at<float>(m,n) - floor_angle_index * 20) / 20;
                     float ceiling_weigth = 1 - floor_weigth;
 
-                    histogram->at<float>(blockIndex, cell_histogram_base_index + floor_angule_index) += floor_weigth * magnitude.at<float>(cell_x, cell_y);
+                    histogram->at<float>(blockIndex, cell_histogram_base_index + floor_angle_index) += floor_weigth * magnitude.at<float>(cell_x, cell_y);
 
                     if(floor_angule_index != 8){
-                        histogram->at<float>(blockIndex, cell_histogram_base_index + floor_angule_index + 1) += ceiling_weigth * magnitude.at<float>(cell_x, cell_y);
+                        histogram->at<float>(blockIndex, cell_histogram_base_index + floor_angle_index + 1) += ceiling_weigth * magnitude.at<float>(cell_x, cell_y);
                     }
                 }
             }
