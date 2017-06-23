@@ -3,11 +3,19 @@
 
 using namespace cv;
 
-typedef struct Block {
-    std::vector<Mat> cells;
-} Block;
+typedef struct BlockHistogram {
+    Mat * histogram;
+    int id;
+    int predicted_id;
+} BlockHistogram;
+
+typedef struct HogImage {
+    std::vector<Mat> blocks;
+    int id;
+} HogImage;
 
 typedef struct HogManager{
-    std::vector<Block> blocks;
-    int numberOfCellsPerBlock;
+    std::vector<HogImage> images;
+    int numberBlockPerRow;
+    int numberCellPerRow;
 } HogManager;

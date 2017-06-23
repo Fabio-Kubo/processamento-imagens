@@ -5,74 +5,78 @@
 #include <ostream>
 
 #include "hog.h"
-#include "image.h"
 
 using namespace cv;
 
-Mat * convertImageToHogImage(Image image){
-    //TODO converter image to Mat * e aplicar ao final o metodo abaixo
-    //images_blocks[i].convertTo(images_blocks[i], CV_32F, 1/255.0);
+HogManager * initializeHogManager(std::vector<Mat> images){
+    const int NUMBER_OF_BLOCKS_PER_ROW_IMAGE = 8;
+    const int NUMBER_OF_CELLS_PER_ROW_BLOCK = 2;
 
-    return NULL;
+    HogManager * hogManager = (HogManager *) malloc(sizeof(HogManager));
+    hogManager->numberBlockPerRow = NUMBER_OF_BLOCKS_PER_ROW_IMAGE;
+    hogManager->numberCellPerRow = NUMBER_OF_CELLS_PER_ROW_BLOCK;
+
+    //TODO percorrer todos os pontos de interesse de cada imagem e extrair
+
+    return hogManager;
 }
 
-/*
-Each image should be a Mat instance with float between 0-1 values (CV-32F)
-*/
-Mat * calculateHog(HogManager * hogManager) {
 
-    Mat * histogram = new Mat( hogManager->blocks.size(), hogManager->numberOfCellsPerBlock * 9, CV_32F);
+int getHistogramBaseIndex(HogManager * hogManager, int pixelXAbsolute, int pixelYAbsolute, int cellDimension){
+    int numberBins = 9;
+    int cellRow = pixelYAbsolute / cellDimension;
+    int cellColumn = pixelXAbsolute / cellDimension;
 
-    for (int blockIndex = 0; blockIndex < hogManager->blocks.size(); blockIndex++) {
-        for (int cellIndex = 0; cellIndex < hogManager->numberOfCellsPerBlock; cellIndex++) {
+    int cellPosition = cellRow * hogManager->numberCellPerRow + cellColumn;
 
-            //get current cell
-            Mat * current_cell = &(hogManager->blocks[blockIndex].cells[cellIndex]);
-            int cell_histogram_base_index = cellIndex * 9;
+    return cellPosition * numberBins;
+}
+
+std::vector<BlockHistogram *> calculateHog(HogManager * hogManager) {
+
+    int numberBlocksPerImage = hogManager->numberBlockPerRow * hogManager->numberBlockPerRow;
+    int numberCellsPerBlock = hogManager->numberCellPerRow * hogManager->numberCellPerRow;
+    int cellDimension = hogManager->images[0].blocks[0].rows / hogManager->numberCellPerRow;
+
+    std::vector<BlockHistogram *> blocksHistograms;
+
+    BlockHistogram * newBlockHistogram;
+
+    for (int imageIndex = 0; imageIndex < hogManager->images.size(); imageIndex++) {
+        for (int blockIndex = 0; blockIndex < numberBlocksPerImage; blockIndex++) {
+
+            //creates new block Histogram
+            newBlockHistogram = (BlockHistogram *) malloc(sizeof(BlockHistogram));
+            newBlockHistogram->id = hogManager->images[imageIndex].id;
 
             // Calculate gradients gx, gy by using image 1-derivative x and y direction
             Mat gx, gy;
-            Sobel(*current_cell, gx, CV_32F, 1, 0, 1);
-            Sobel(*current_cell, gy, CV_32F, 0, 1, 1);
+            Sobel(hogManager->images[imageIndex].blocks[blockIndex], gx, CV_32F, 1, 0, 1);
+            Sobel(hogManager->images[imageIndex].blocks[blockIndex], gy, CV_32F, 0, 1, 1);
 
             //Calculate gradient magnitude and direction (in degrees)
             Mat magnitude, angle;
             cartToPolar(gx, gy, magnitude, angle, 1);
 
-            // for each pixel, updates values in histogram
-            for (int cell_x = 0; cell_x < current_cell->rows; cell_x++) {
-                for (int cell_y = 0; cell_y < current_cell->cols; cell_y++) {
+            //for each pixel, adds its magnitude to its histogram[floor(angle)] and histogram[floor(angle) + 1]
+            for (int pixelX = 0; pixelX < hogManager->images[imageIndex].blocks[blockIndex].rows; pixelX++) {
+                for (int pixelY = 0; pixelY < hogManager->images[imageIndex].blocks[blockIndex].cols; pixelY++) {
+                    int histogramBaseIndex = getHistogramBaseIndex(pixelX, pixelY, cellDimension);
 
-                    int floor_angle_index = (int) angle.at<float>(cell_x, cell_y) / 20.0;
-                    float floor_weigth = (angle.at<float>(cell_x, cell_y) - floor_angle_index * 20) / 20;
-                    float ceiling_weigth = 1 - floor_weigth;
+                    int floorAngleIndex = (int) angle.at<float>(pixelX, pixelY) / 20.0;
+                    float floorWeigth = (angle.at<float>(pixelX, pixelY) - floorAngleIndex * 20) / 20;
+                    float ceilingWeigth = 1 - floorWeigth;
 
-                    histogram->at<float>(blockIndex, cell_histogram_base_index + floor_angle_index) += floor_weigth * magnitude.at<float>(cell_x, cell_y);
+                    newBlockHistogram->histogram->at<float>(blockIndex, histogramBaseIndex + floorAngleIndex) += floorWeigth * magnitude.at<float>(pixelX, pixelY);
 
-                    if(floor_angle_index != 8){
-                        histogram->at<float>(blockIndex, cell_histogram_base_index + floor_angle_index + 1) += ceiling_weigth * magnitude.at<float>(cell_x, cell_y);
+                    if(ceilingWeigth != 0){
+                        newBlockHistogram->histogram->at<float>(blockIndex, histogramBaseIndex + floorAngleIndex + 1) += ceilingWeigth * magnitude.at<float>(pixelX, pixelY);
                     }
                 }
             }
+            blocksHistograms.push_back(newBlockHistogram);
         }
     }
 
-    return histogram;
-}
-
-int main(int argc, char** argv )
-{
-
-    std::vector<Mat> images;
-
-    images.push_back(imread("data/obj1.png"));
-    images.push_back(imread("data/obj2.png"));
-    images.push_back(imread("data/obj3.png"));
-
-    //Mat * histogram = calculateHog(images);
-
-    //print Mat content
-    //std::cout << "M = "<< std::endl << " "  << *histogram << std::endl << std::endl;
-
-    return 0;
+    return blocksHistograms;
 }
