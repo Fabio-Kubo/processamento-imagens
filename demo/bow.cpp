@@ -2,18 +2,24 @@
 #include "flToIft.cpp"
 
 // Super pixel sampling.
-#define N_SUPER_PIXELS 150;
-#define SP_ALPHA 0.12;
-#define SP_BETA 12;
-#define N_SP_ITERATIONS 10;
-#define N_SP_SMOOTH_ITERATIONS 0;
+#define N_SUPER_PIXELS 15
+#define SP_ALPHA 0.10f
+#define SP_BETA 10
+#define N_SP_ITERATIONS 10
+#define N_SP_SMOOTH_ITERATIONS 0
+#define SP_PATCH_SIZE 16
+#define SP_MAX_SAMPLES 64
+
 // Grid sampling.
-#define GRID_PATCH_SIZE 64;
+#define GRID_PATCH_SIZE 32
 
 // k-means Clustering.
-#define N_VISUAL_WORDS 1000;
-#define N_K_MEANS_ITERATIONS 100;
-#define K_MEANS_TOLERANCE 0.001;
+#define N_VISUAL_WORDS 1000
+#define N_K_MEANS_ITERATIONS 100
+#define K_MEANS_TOLERANCE 0.001
+
+// Color histogram.
+#define CH_N_BINS 7
 
 int main(int argc, char **argv) {
     //Caminhos onde esta o arquivo txt gerado pelo o script python "selec_samples2.py"
@@ -64,7 +70,7 @@ int main(int argc, char **argv) {
     ArgumentList* samplingArguments = createArgumentList();
 
     // NO sampling.
-    //bowManager->imageSamplerFunction = NULL;
+    bowManager->imageSamplerFunction = NULL;
 
     // Grid sampling.
     bowManager->imageSamplerFunction = gridSamplingBow;
@@ -72,13 +78,15 @@ int main(int argc, char **argv) {
     ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, GRID_PATCH_SIZE);
 
     // Super Pixel Sampling.
-    /*bowManager->imageSamplerFunction = superPixelSamplingBow
+    /*bowManager->imageSamplerFunction = superPixelSamplingBow;
     ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, N_SUPER_PIXELS);
-    ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, SP_ALPHA);
+    ARGLIST_PUSH_BACK_AS(float, samplingArguments, SP_ALPHA);
     ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, SP_BETA);
     ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, N_SP_ITERATIONS);
-    ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, N_SP_SMOOTH_ITERATIONS);*/
-
+    ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, N_SP_SMOOTH_ITERATIONS);
+    ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, SP_PATCH_SIZE);
+    ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, SP_MAX_SAMPLES);
+    */
     bowManager->argumentListOfSampler = samplingArguments;
     //////////////////////////////////////////////////////////
 
@@ -104,9 +112,8 @@ int main(int argc, char **argv) {
     //Note que o cabecalho geral para a funcao do extrator e
     //Matrix* MinhaFuncaoFeatureExtractor(GVector* outputSampler, BagOfVisualWordsManager* bagOfVisualWordsManager);
     ArgumentList* colorFeatureExtractorArguments = createArgumentList();
-    size_t nbins = 7;
-    ARGLIST_PUSH_BACK_AS(size_t,colorFeatureExtractorArguments,nbins); //nBins per channel
-    ARGLIST_PUSH_BACK_AS(size_t,colorFeatureExtractorArguments,nbins*nbins*nbins); //total number of channels
+    ARGLIST_PUSH_BACK_AS(size_t,colorFeatureExtractorArguments,CH_N_BINS); //nBins per channel
+    ARGLIST_PUSH_BACK_AS(size_t,colorFeatureExtractorArguments,CH_N_BINS*CH_N_BINS*CH_N_BINS); //total number of channels
     bowManager->argumentListOfFeatureExtractor = colorFeatureExtractorArguments; //passando a lista de argumentos do feature extractor para o bow manager
     ///////////////////////////////////////
 
