@@ -61,7 +61,7 @@ std::vector<BlockHistogram *> calculateHog(HogManager * hogManager) {
             //for each pixel, adds its magnitude to its histogram[floor(angle)] and histogram[floor(angle) + 1]
             for (int pixelX = 0; pixelX < hogManager->images[imageIndex].blocks[blockIndex].rows; pixelX++) {
                 for (int pixelY = 0; pixelY < hogManager->images[imageIndex].blocks[blockIndex].cols; pixelY++) {
-                    int histogramBaseIndex = getHistogramBaseIndex(pixelX, pixelY, cellDimension);
+                    int histogramBaseIndex = getHistogramBaseIndex(hogManager, pixelX, pixelY, cellDimension);
 
                     int floorAngleIndex = (int) angle.at<float>(pixelX, pixelY) / 20.0;
                     float floorWeigth = (angle.at<float>(pixelX, pixelY) - floorAngleIndex * 20) / 20;
@@ -79,4 +79,29 @@ std::vector<BlockHistogram *> calculateHog(HogManager * hogManager) {
     }
 
     return blocksHistograms;
+}
+
+
+Matrix* computeHogBow(GVector* vector,BagOfVisualWordsManager* bagOfVisualWordsManager){
+    ArgumentList* argumentList = bagOfVisualWordsManager->argumentListOfFeatureExtractor;
+    if(argumentList->length < 2){
+        printf("[computeColorHistogram] invalid argument list");
+        return NULL;
+    }
+    if(vector->size == 0){
+        printf("[computeColorHistogram] vector has 0 elements");
+        return NULL;
+    }
+    Image* patch = VECTOR_GET_ELEMENT_AS(Image*,vector,0);
+    Mat cvBlock(patch->nx, patch->ny, CV_8UC3, Scalar(0, 0, 0));
+    for (int y = 0; y < patch->ny; y++) {
+      for (int x = 0; x < patch->nx; x++) {
+        cvBlock.at<uchar>(x, y, 0) = imageValCh(patch, x, y, 0);
+        cvBlock.at<uchar>(x, y, 1) = imageValCh(patch, x, y, 1);
+        cvBlock.at<uchar>(x, y, 2) = imageValCh(patch, x, y, 2);
+      }
+    }
+    size_t nbinsPerChannel = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,0);
+    size_t totalBins = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,1);
+    return computeColorHistogram(vector,nbinsPerChannel,totalBins);
 }

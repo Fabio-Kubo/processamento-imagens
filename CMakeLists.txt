@@ -21,6 +21,7 @@ message(STATUS ${CMAKE_MODULE_PATH})
 find_package( CBLAS REQUIRED )
 find_package( LAPACK REQUIRED )
 find_package(OpenMP)
+find_package( OpenCV REQUIRED )
 if (OPENMP_FOUND)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -29,25 +30,25 @@ endif()
 option (USE_LAPACKE "Use LAPACKE C interface to LAPACK" ON)
 option (USE_LAPACKE "Use BLAS C interface to BLAS" ON)
 option (USE_OPENMP "Use OpenMP for multithreading" ON)
- 
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
- 
+
 include_directories(include src .)
 message(Compiler: "${CMAKE_CXX_COMPILER_ID}")
 
 message(Compiler: "${CMAKE_C_COMPILER_ID}")
- 
+
 aux_source_directory(${libFL_SOURCE_DIR}/src LIBFL_SRC)
- 
+
 file(GLOB LIBFL_INCLUDE
     ${libfl_SOURCE_DIR}/include/*.h)
- 
+
 
 message(STATUS "LIBFL library")
 foreach( libflsourcefile ${LIBFL_SRC} )
     message(STATUS "\t${libflsourcefile}")
 endforeach(libflsourcefile ${LIBFL_SRC})
- 
+
 add_library(libfl STATIC ${LIBFL_SRC} ${LIBFL_INCLUDE})
 
 file(GLOB LIBFL_DEMO
@@ -58,7 +59,7 @@ file(GLOB LIBFL_DEMO
 install(FILES ${LIBFL_INCLUDE}
         DESTINATION include
         )
- 
+
 message(STATUS "Demo files")
 foreach( demosourcefile ${LIBFL_DEMO} )
     get_filename_component(demofilename ${demosourcefile} NAME)
@@ -67,7 +68,7 @@ foreach( demosourcefile ${LIBFL_DEMO} )
     message(STATUS "\t${demosourcefile}")
 
     add_executable( ${demoname} ${demosourcefile})
-    target_link_libraries( ${demoname} libfl ${LAPACK_LIBRARIES} ${CBLAS_LIBRARIES} stdc++)
+    target_link_libraries( ${demoname} libfl ${LAPACK_LIBRARIES} ${CBLAS_LIBRARIES} ${OpenCV_LIBS} stdc++)
 
     #install(TARGETS ${demoname} RUNTIME DESTINATION bin)
 

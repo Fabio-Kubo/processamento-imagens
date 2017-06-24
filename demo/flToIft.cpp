@@ -85,8 +85,8 @@ GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, i
             if (y >= labels->ysize - 1)
               border.end.y = labels->ysize - 1;
 
-            /*int label = labels->val[y*labels->xsize + x];
-            imageValCh(img, x, y, 0) = label;
+            int label = labels->val[y*labels->xsize + x];
+            /*imageValCh(img, x, y, 0) = label;
             imageValCh(img, x, y, 1) = label;
             imageValCh(img, x, y, 2) = label;*/
 
@@ -101,7 +101,7 @@ GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, i
               //printf("pixel %d: ", y*labels->xsize + x);
               //printf("poi: %d\n", countAdjacents);
 
-              /*for (int i = x - patchSize; i <= x + patchSize; i++) {
+              for (int i = x - patchSize; i <= x + patchSize; i++) {
                 if (i < 0) continue; if (i >= img->nx) continue;
                 for (int j = y - patchSize; j <= y + patchSize; j++) {
                   if (j < 0) continue; if (j >= img->ny) continue;
@@ -121,7 +121,7 @@ GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, i
 
               imageValCh(img, x, y, 0) = 255;
               imageValCh(img, x, y, 1) = 0;
-              imageValCh(img, x, y, 2) = 0;*/
+              imageValCh(img, x, y, 2) = 0;
 
               VECTOR_GET_ELEMENT_AS(Image*,vector_images,k) = extractSubImage(img, x, y,patchSize, patchSize, true);
               k++;
@@ -129,7 +129,7 @@ GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, i
               if (k >= vector_images->size) stop = 1;
             }
         }
-        //writeImagePNG(img,"poi.png");
+        writeImagePNG(img,"poi.png");
     }
     resizeVector(vector_images, k - 1);
     return vector_images;
@@ -189,7 +189,7 @@ iftImage *computeSuperPixels(iftImage *img, int nsuperpixels, float alpha, float
 GVector* superPixelSamplingBow(Image* image, BagOfVisualWordsManager* bagOfVisualWordsManager) {
     ArgumentList* argumentList = bagOfVisualWordsManager->argumentListOfSampler;
 
-    if(argumentList->length != 6) {
+    if(argumentList->length != 7) {
         printf("[superPixelSampling] invalid argument list");
         return NULL;
     }

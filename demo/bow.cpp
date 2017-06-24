@@ -1,5 +1,6 @@
 #include "FL.h"
 #include "flToIft.cpp"
+#include "hog.h"
 
 /**
  * SAMPLERS:
@@ -18,7 +19,7 @@
  * 0 -> SVM
  * 1 -> k-means
  */
-#define SAMPLER 0
+#define SAMPLER 1
 #define FEATURE_EXTRACTOR 0
 #define CLUSTERING 0
 #define CLASSIFIER 0
@@ -42,6 +43,10 @@
 
 // Color histogram.
 #define CH_N_BINS 7
+
+// HOG.
+#define N_HOG_BLOCK_PER_ROW 8
+#define N_HOG_CELLS_PER_ROW 2
 
 int main(int argc, char **argv) {
     //Caminhos onde esta o arquivo txt gerado pelo o script python "selec_samples2.py"

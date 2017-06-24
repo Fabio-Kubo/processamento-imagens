@@ -29,6 +29,7 @@ $(OBJ)/vector.o \
 $(OBJ)/matrix.o \
 $(OBJ)/file.o \
 $(OBJ)/adjacencyRelation.o \
+$(OBJ)/hog.o \
 $(OBJ)/featureVector.o \
 $(OBJ)/gif.o \
 $(OBJ)/kernel.o \
