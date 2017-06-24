@@ -1,6 +1,28 @@
 #include "FL.h"
 #include "flToIft.cpp"
 
+/**
+ * SAMPLERS:
+ * 0 -> None
+ * 1 -> Grid
+ * 2 -> SuperPixel
+ *
+ * FEATURE EXTRACTORS:
+ * 0 -> Color Histogram
+ * 1 -> HOG
+ *
+ * CLUSTERING:
+ * 0 -> k-means
+ *
+ * CLASSIFIER:
+ * 0 -> SVM
+ * 1 -> k-means
+ */
+#define SAMPLER 0
+#define FEATURE_EXTRACTOR 0
+#define CLUSTERING 0
+#define CLASSIFIER 0
+
 // Super pixel sampling.
 #define N_SUPER_PIXELS 15
 #define SP_ALPHA 0.10f
@@ -69,26 +91,42 @@ int main(int argc, char **argv) {
     // onde o unico elemento desse vetor vai ser a imagem.
     ArgumentList* samplingArguments = createArgumentList();
 
-    // NO sampling.
-    bowManager->imageSamplerFunction = NULL;
+    printf("## SELECTED SAMPLER: ");
+    switch (SAMPLER) {
+        // NO sampling.
+        case 0: {
+            printf("None. ##\n");
+            bowManager->imageSamplerFunction = NULL;
+            break;
+        }
+        // Grid sampling.
+        case 1: {
+            printf("Grid. ##\n");
+            bowManager->imageSamplerFunction = gridSamplingBow;
+            ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, GRID_PATCH_SIZE);
+            ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, GRID_PATCH_SIZE);
+            bowManager->argumentListOfSampler = samplingArguments;
+            break;
+        }
+        // Super Pixel Sampling.
+        case 2: {
+            printf("Super Pixel Sampling. ##\n");
+            bowManager->imageSamplerFunction = superPixelSamplingBow;
+            ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, N_SUPER_PIXELS);
+            ARGLIST_PUSH_BACK_AS(float, samplingArguments, SP_ALPHA);
+            ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, SP_BETA);
+            ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, N_SP_ITERATIONS);
+            ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, N_SP_SMOOTH_ITERATIONS);
+            ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, SP_PATCH_SIZE);
+            ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, SP_MAX_SAMPLES);
+            bowManager->argumentListOfSampler = samplingArguments;
+            break;
+        }
 
-    // Grid sampling.
-    bowManager->imageSamplerFunction = gridSamplingBow;
-    ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, GRID_PATCH_SIZE);
-    ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, GRID_PATCH_SIZE);
-
-    // Super Pixel Sampling.
-    /*bowManager->imageSamplerFunction = superPixelSamplingBow;
-    ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, N_SUPER_PIXELS);
-    ARGLIST_PUSH_BACK_AS(float, samplingArguments, SP_ALPHA);
-    ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, SP_BETA);
-    ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, N_SP_ITERATIONS);
-    ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, N_SP_SMOOTH_ITERATIONS);
-    ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, SP_PATCH_SIZE);
-    ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, SP_MAX_SAMPLES);
-    */
-    bowManager->argumentListOfSampler = samplingArguments;
-    //////////////////////////////////////////////////////////
+        default:
+            printf("invalid sampler function.\n");
+            return -1;
+    }
 
     /////////////////////////////////////////////////////////////////////////////
     //Essa função serve como um garbage collector para o metodo do sampling. Ao final de
@@ -101,8 +139,28 @@ int main(int argc, char **argv) {
     /////////////////////////////////////////////////
 
     /////////////////////////////////////////////////////////////////
-    //Neste exemplo eu irei usar o descritor de cores aprendindo em aula.
-    bowManager->featureExtractorFunction = computeColorHistogramBow;//ponteiro da funcao para a extracao de features
+    printf("## SELECTED FEATURE EXTRACTOR: ");
+    switch (FEATURE_EXTRACTOR) {
+        // Color Histogram.
+        case 0: {
+            printf("Color Histogram. ##\n");
+            bowManager->featureExtractorFunction = computeColorHistogramBow;
+            ArgumentList* colorFeatureExtractorArguments = createArgumentList();
+            ARGLIST_PUSH_BACK_AS(size_t,colorFeatureExtractorArguments,CH_N_BINS);
+            ARGLIST_PUSH_BACK_AS(size_t,colorFeatureExtractorArguments,CH_N_BINS*CH_N_BINS*CH_N_BINS);
+            bowManager->argumentListOfFeatureExtractor = colorFeatureExtractorArguments;
+            break;
+        }
+        // HOG.
+        case 1:
+            printf("HOG. ##\n");
+            return -1;
+        default:
+            printf("invalid feature extractor function.\n");
+            return -1;
+    }
+
+
 
     //o meu metodo para fazer o histograma de cores recebe 2 parametros (exlcuindo vetor de entrada)
     //0 - vetor com as imagens dos patchs (esse argumento n'ao conta)
@@ -111,10 +169,7 @@ int main(int argc, char **argv) {
     //criar uma argumentList e colocar dois parametros nela.
     //Note que o cabecalho geral para a funcao do extrator e
     //Matrix* MinhaFuncaoFeatureExtractor(GVector* outputSampler, BagOfVisualWordsManager* bagOfVisualWordsManager);
-    ArgumentList* colorFeatureExtractorArguments = createArgumentList();
-    ARGLIST_PUSH_BACK_AS(size_t,colorFeatureExtractorArguments,CH_N_BINS); //nBins per channel
-    ARGLIST_PUSH_BACK_AS(size_t,colorFeatureExtractorArguments,CH_N_BINS*CH_N_BINS*CH_N_BINS); //total number of channels
-    bowManager->argumentListOfFeatureExtractor = colorFeatureExtractorArguments; //passando a lista de argumentos do feature extractor para o bow manager
+     //passando a lista de argumentos do feature extractor para o bow manager
     ///////////////////////////////////////
 
     ///////////////////////////////////////////////////////
@@ -133,16 +188,26 @@ int main(int argc, char **argv) {
     //desta forma eu preciso criar uma ArgumentList com 6 parametros.
     //Note que o cabecalho geral para a funcao de clustering e
     //typedef Matrix* minhaFuncaoDeClustering(Matrix* outputFeatureExtractor_allSamples, BagOfVisualWordsManager* bagOfVisualWordsManager);
-    bowManager->clusteringFunction = kmeansClusteringBow;
-    ArgumentList* clusteringMethodArguments = createArgumentList();
-    ARGLIST_PUSH_BACK_AS(size_t, clusteringMethodArguments, N_VISUAL_WORDS); //number of words
-    ARGLIST_PUSH_BACK_AS(size_t, clusteringMethodArguments, N_K_MEANS_ITERATIONS); //maximum number of iterations
-    ARGLIST_PUSH_BACK_AS(double, clusteringMethodArguments, K_MEANS_TOLERANCE); //tolerance
-    ARGLIST_PUSH_BACK_AS(int,clusteringMethodArguments,0); //seed
-    ARGLIST_PUSH_BACK_AS(DistanceFunction,clusteringMethodArguments,computeNormalizedL1Norm); //seed
-    ARGLIST_PUSH_BACK_AS(ArgumentList*,clusteringMethodArguments,NULL); //seed
-    bowManager->argumentListOfClustering = clusteringMethodArguments;
-    ///////////////////////////////////////////////////////////////
+    printf("## SELECTED CLUSTERING: ");
+    switch (CLUSTERING) {
+        // k-means
+        case 0: {
+            printf("K-means. ##\n");
+            bowManager->clusteringFunction = kmeansClusteringBow;
+            ArgumentList* clusteringMethodArguments = createArgumentList();
+            ARGLIST_PUSH_BACK_AS(size_t, clusteringMethodArguments, N_VISUAL_WORDS); //number of words
+            ARGLIST_PUSH_BACK_AS(size_t, clusteringMethodArguments, N_K_MEANS_ITERATIONS); //maximum number of iterations
+            ARGLIST_PUSH_BACK_AS(double, clusteringMethodArguments, K_MEANS_TOLERANCE); //tolerance
+            ARGLIST_PUSH_BACK_AS(int,clusteringMethodArguments,0); //seed
+            ARGLIST_PUSH_BACK_AS(DistanceFunction,clusteringMethodArguments,computeNormalizedL1Norm); //seed
+            ARGLIST_PUSH_BACK_AS(ArgumentList*,clusteringMethodArguments,NULL); //seed
+            bowManager->argumentListOfClustering = clusteringMethodArguments;
+            break;
+        }
+
+        default:
+            printf("invalid clustering function\n");
+    }
 
     ////////////
     //computa o dicionario
@@ -175,26 +240,42 @@ int main(int argc, char **argv) {
 
 
     //"kmeans classifier"
-//    Kmeans_Classifier* classifierkmeans = createKmeansClassifier();
-//    classifierkmeans->nlabels = 100;
-//    bowManager->classifier = (void*)classifierkmeans;
-//    bowManager->fitFunction = kmeans_Classifier_fit;
-//    bowManager->storeTrainData = false;
-//    bowManager->predictFunction = kmeans_Classifier_predict;
-//    bowManager->storePredictedData = false;
-//    bowManager->freeFunctionClassifier = destroyKmeansClassifierForVoidPointer;
+    printf("## SELECTED CLASSIFIER: ");
+    switch (CLASSIFIER) {
+        // SVM.
+        case 0: {
+            printf("SVM. ##\n");
+            SVM_Classifier* classifiersvm = createSVMClassifier();
+            classifiersvm->param.kernel_type = RBF;
+            classifiersvm->param.gamma = 3.5;
+            bowManager->classifier = (void*)classifiersvm;
+            bowManager->fitFunction = svm_Classifier_fit;
+            bowManager->storeTrainData = false;
+            bowManager->predictFunction = svm_Classifier_predict;
+            bowManager->storePredictedData = false;
+            bowManager->freeFunctionClassifier = destroySVMClassifierForVoidPointer;
+            break;
+        }
 
+        // k-means.
+        case 1: {
+            printf("k-means. ##\n");
+            Kmeans_Classifier* classifierkmeans = createKmeansClassifier();
+            classifierkmeans->nlabels = 100;
+            bowManager->classifier = (void*)classifierkmeans;
+            bowManager->fitFunction = kmeans_Classifier_fit;
+            bowManager->storeTrainData = false;
+            bowManager->predictFunction = kmeans_Classifier_predict;
+            bowManager->storePredictedData = false;
+            bowManager->freeFunctionClassifier = destroyKmeansClassifierForVoidPointer;
+            break;
+        }
 
-    //SVM Classifier
-    SVM_Classifier* classifiersvm = createSVMClassifier();
-    classifiersvm->param.kernel_type = RBF;
-    classifiersvm->param.gamma = 3.5;
-    bowManager->classifier = (void*)classifiersvm;
-    bowManager->fitFunction = svm_Classifier_fit;
-    bowManager->storeTrainData = false;
-    bowManager->predictFunction = svm_Classifier_predict;
-    bowManager->storePredictedData = false;
-    bowManager->freeFunctionClassifier = destroySVMClassifierForVoidPointer;
+        default:
+            printf("invalid classifier function.\n");
+            return -1;
+    }
+
     //////////////////////////////////////
 
     ///////
@@ -213,21 +294,21 @@ int main(int argc, char **argv) {
     //computa uma simples acuracia (numero de amostras rotuladas corretamente / numero de amostras do conjunto)
     GVector* trueLabels = createNullVector(bowManager->pathsToImages_test->size,sizeof(int));
     int hit = 0;
-    printf("file | predicted true\t\tcorrect\n");
-    char symbol;
+    //printf("file | predicted true\t\tcorrect\n");
+    //char symbol;
     for (size_t index = 0; index < bowManager->pathsToImages_test->size; ++index) {
-        symbol = 'X';
+        //symbol = 'X';
         char * path = VECTOR_GET_ELEMENT_AS(char*,bowManager->pathsToImages_test,index);
         VECTOR_GET_ELEMENT_AS(int,trueLabels,index) = findTrueLabelInName(path);
         if(VECTOR_GET_ELEMENT_AS(int,trueLabels,index) == VECTOR_GET_ELEMENT_AS(int,labelsPredicted,index)){
             hit++;
-            symbol = 'O';
+            //symbol = 'O';
         }
-        printf("%s | %d %d\t\t%c\n",
+        /*printf("%s | %d %d\t\t%c\n",
                path,
                VECTOR_GET_ELEMENT_AS(int,labelsPredicted,index),
                VECTOR_GET_ELEMENT_AS(int,trueLabels,index),symbol
-        );
+        );*/
     }
     double acuracia = ((double)hit) / bowManager->pathsToImages_test->size;
     printf("acuracia: %f\n",acuracia);
