@@ -123,13 +123,20 @@ GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, i
               imageValCh(img, x, y, 1) = 0;
               imageValCh(img, x, y, 2) = 0;
 
-              VECTOR_GET_ELEMENT_AS(Image*,vector_images,k) = extractSubImage(img, x, y,patchSize, patchSize, true);
+              Image *subImage = extractSubImage(img, x, y,patchSize, patchSize, true);
+              subImage->imageROI.coordinateX = x - (patchSize / 2);
+              subImage->imageROI.coordinateY = y - (patchSize / 2);
+              subImage->imageROI.coordinateZ = 0;
+              subImage->imageROI.size_x = patchSize;
+              subImage->imageROI.size_y = patchSize;
+              subImage->imageROI.size_z = 1;
+              VECTOR_GET_ELEMENT_AS(Image*,vector_images,k) = subImage;
               k++;
 
               if (k >= vector_images->size) stop = 1;
             }
         }
-        writeImagePNG(img,"poi.png");
+        //writeImagePNG(img,"poi.png");
     }
     resizeVector(vector_images, k - 1);
     return vector_images;

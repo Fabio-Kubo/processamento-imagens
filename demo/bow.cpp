@@ -18,8 +18,8 @@
  * 0 -> SVM
  * 1 -> k-means
  */
-#define SAMPLER 1
-#define FEATURE_EXTRACTOR 0
+#define SAMPLER 2
+#define FEATURE_EXTRACTOR 1
 #define CLUSTERING 0
 #define CLASSIFIER 0
 
@@ -44,8 +44,9 @@
 #define CH_N_BINS 7
 
 // HOG.
-#define N_HOG_BLOCK_PER_ROW 8
-#define N_HOG_CELLS_PER_ROW 2
+#define N_HOG_CELLS_PER_BLOCK 2
+#define N_HOG_CELL_SIZE 16
+#define HOG_BIN_SIZE 20
 
 int main(int argc, char **argv) {
     //Caminhos onde esta o arquivo txt gerado pelo o script python "selec_samples2.py"
@@ -61,6 +62,10 @@ int main(int argc, char **argv) {
 
     //apenas checkando se o vetor vazio. Caso o vetor esteja vazio, talvez seu caminho ate o arquivo
     //txt nao esteja correto
+    if(vectorSamplesUsed2CreateDict == NULL){
+        printf("error\n");
+        return -1;
+    }
     if(vectorSamplesUsed2CreateDict->size == 0){
         printf("no path found");
         return -1;
@@ -155,13 +160,23 @@ int main(int argc, char **argv) {
             bowManager->argumentListOfFeatureExtractor = colorFeatureExtractorArguments;
             break;
         }
+
         // HOG.
-        case 1:
+        case 1: {
             printf("HOG. ##\n");
-            return -1;
-        default:
+            bowManager->featureExtractorFunction = computeHogDescriptorCustom;
+            ArgumentList* hogFeatureExtractorArguments = createArgumentList();
+            ARGLIST_PUSH_BACK_AS(size_t,hogFeatureExtractorArguments,N_HOG_CELLS_PER_BLOCK);
+            ARGLIST_PUSH_BACK_AS(size_t,hogFeatureExtractorArguments,N_HOG_CELL_SIZE);
+            ARGLIST_PUSH_BACK_AS(size_t,hogFeatureExtractorArguments,HOG_BIN_SIZE);
+            bowManager->argumentListOfFeatureExtractor = hogFeatureExtractorArguments;
+            break;
+        }
+
+        default: {
             printf("invalid feature extractor function.\n");
             return -1;
+        }
     }
 
 

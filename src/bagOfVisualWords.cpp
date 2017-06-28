@@ -122,6 +122,42 @@ Matrix* computeColorHistogramBow(GVector* vector,BagOfVisualWordsManager* bagOfV
     return computeColorHistogram(vector,nbinsPerChannel,totalBins);
 }
 
+
+Matrix* computeHogDescriptorCustom(GVector* vector, BagOfVisualWordsManager* bagOfVisualWordsManager) {
+    ArgumentList* argumentList = bagOfVisualWordsManager->argumentListOfFeatureExtractor;
+    if(argumentList->length < 3){
+        printf("[computeHog] invalid argument list");
+        return NULL;
+    }
+    if(vector->size == 0){
+        printf("[computeHog] vector has 0 elements");
+        return NULL;
+    }
+
+    size_t cellsPerBlock = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,0);
+    size_t cellSize = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,1);
+    size_t binSize = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,2);
+
+    HogManager *hogManager = createHogManager();
+    hogManager->useUnsignedGradients = true;
+    hogManager->binSize =binSize;
+    hogManager->cellSizeX = cellSize;
+    hogManager->cellSizeY = cellSize;
+    hogManager->cellsPerBlockX = cellsPerBlock;
+    hogManager->cellsPerBlockY = cellsPerBlock;
+    hogManager->strideX = hogManager->cellSizeX;
+    hogManager->strideY = hogManager->cellSizeY;
+
+    hogManager->image = bagOfVisualWordsManager->currentImage;
+    computeHogDescriptor(hogManager);
+
+    Matrix *matrix = computeHogDescriptorForRegionsOfInterest(vector,hogManager);
+
+    destroyHogManager(&hogManager);
+
+    return matrix;
+}
+
 void generateAllVisualWords(BagOfVisualWordsManager *bagOfVisualWordsManager){
     Matrix* allFeatures = NULL;
     if(!bagOfVisualWordsManager->imageSamplerFunction){
@@ -213,6 +249,7 @@ void computeDictionary(BagOfVisualWordsManager *bagOfVisualWordsManager){
             printf("[computeDictionary] invalid image path: %s",imagePath);
             continue;
         }
+        bagOfVisualWordsManager->currentImage = image;
         GVector* samplingResults = NULL;
         if(bagOfVisualWordsManager->imageSamplerFunction){
             samplingResults = bagOfVisualWordsManager->imageSamplerFunction(image,
@@ -301,6 +338,7 @@ void trainClassifier(BagOfVisualWordsManager* bagOfVisualWordsManager){
             printf("[computeDictionary] Invalid image path: %s",imagePath);
             continue;
         }
+        bagOfVisualWordsManager->currentImage = image;
         GVector* samplingResults = NULL;
         if(bagOfVisualWordsManager->imageSamplerFunction){
             samplingResults = bagOfVisualWordsManager->imageSamplerFunction(image,

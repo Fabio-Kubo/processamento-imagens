@@ -87,7 +87,7 @@ GVector* gridSamplingBow(Image* image, BagOfVisualWordsManager* bagOfVisualWords
 //
 //
 Matrix* computeColorHistogramBow(GVector* vector,BagOfVisualWordsManager* bagOfVisualWordsManager);
-//
+Matrix* computeHogDescriptorCustom(GVector* vector, BagOfVisualWordsManager* bagOfVisualWordsManager);
 //
 Matrix* kmeansClusteringBow(Matrix* featureMatrix, BagOfVisualWordsManager* bagOfVisualWordsManager);
 //

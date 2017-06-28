@@ -19,7 +19,7 @@ Matrix* computeColorHistogram(GVector* vector_images,size_t nbinsPerChannel,size
     return matrix;
 }
 
-HogManager* createHogManager(){
+HogManager* createHogManager() {
     HogManager* hogManager = (HogManager*)calloc(1,sizeof(HogManager));
     hogManager->binSize = 20;
     hogManager->cellSizeX = 8;
@@ -101,15 +101,18 @@ void compudeGradientImage(HogManager* hogManager){
     hogManager->gradientImagePhase = gradientphase;
 }
 
-Matrix* computeHogDescriptorForRegionsOfInterest(GVector* vector_ROIs,HogManager* hogManager){
+Matrix* computeHogDescriptorForRegionsOfInterest(GVector* vector_ROIs, HogManager* hogManager){
     //Matrix* matrix = createMatrix(vector_ROIs->size,totalNumberBins,sizeof(float));
     GVector* featureVector_hog = NULL;
     int shift = 0;
     size_t nrows = vector_ROIs->size;
     size_t ncols = 0;
+    printf("asda\n");
+    printf("cam: %d\n", vector_ROIs->size);
     for (int i = 0; i < vector_ROIs->size; ++i) {
         Image* workImage = hogManager->image;
-        RegionOfInterest regionOfInterest = VECTOR_GET_ELEMENT_AS(RegionOfInterest,vector_ROIs,i);
+        Image *subImage = VECTOR_GET_ELEMENT_AS(Image*,vector_ROIs,i);
+        RegionOfInterest regionOfInterest = subImage->imageROI;
         workImage->imageROI = regionOfInterest;
         computeHogDescriptor(hogManager);
         if(featureVector_hog){
@@ -131,14 +134,13 @@ Matrix* computeHogDescriptorForRegionsOfInterest(GVector* vector_ROIs,HogManager
         }
     }
     Matrix* matrix = createMatrix(nrows,ncols,sizeof(float));
+    printf("cam: %d %d\n", nrows, ncols);
     //destroyMatrix(&matrix);
     destroyVector(&(matrix->matrixData));
     matrix->matrixData = featureVector_hog;
     MATRIX_PRINT_AS(float,"%f ",matrix);
     printf("%lu %lu\n",matrix->numberRows,matrix->numberColumns);
-    destroyMatrix(&matrix);
-    //destroyVector(&vector_ROIs);
-    return NULL;
+    return matrix;
 }
 
 void computeHogDescriptor(HogManager* hogManager){
@@ -239,10 +241,11 @@ void computeHogDescriptor(HogManager* hogManager){
         y_cell_start = y_block_start;
         float *histogramBlock = NULL;
         int sizeHistogramBlock = 0;
+        printf("cam: %d %d\n", y_block_end, x_block_end);
         while(y_cell_start < y_block_end && x_cell_start < x_block_end){
             x_cell_end = x_cell_start + hogManager->cellSizeX;
             y_cell_end = y_cell_start +  hogManager->cellSizeY;
-            //printf("[computeHogDescriptor] cell [%d %d]\n",x_cell_start,y_cell_start);
+            printf("[computeHogDescriptor] cell [%d %d]\n",x_cell_start,y_cell_start);
             histogramCell = (float*)calloc(nBins,sizeof(float));
 
             //compute histogram for cell
