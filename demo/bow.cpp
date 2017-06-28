@@ -1,6 +1,5 @@
 #include "FL.h"
 #include "flToIft.cpp"
-#include "hog.h"
 
 /**
  * SAMPLERS:

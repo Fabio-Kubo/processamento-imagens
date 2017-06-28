@@ -37,37 +37,46 @@ typedef Matrix* (*ClusteringFunction)(Matrix* outputFeatureExtractor_allSamples,
 typedef GVector* (*MountHistogramFunction) (Matrix* outputFeatureExtractor_singleSample,BagOfVisualWordsManager* bagOfVisualWordsManager);
 
 typedef struct _bagOfVisualWordsManager {
-        GVector* pathsToImages_dictionary;
-        GVector* pathsToImages_train;
-        GVector* pathsToImages_test;
-        Matrix* dictionary;
+    //paths
+    GVector* pathsToImages_dictionary;
+    GVector* pathsToImages_train;
+    GVector* pathsToImages_test;
 
-        Matrix* histogramsTraining;
-        GVector* labelsTraining;
-        Matrix* histogramsPredictSamples;
-        GVector* labelsPredicted;
+    //dictionery stuffs
+    Matrix* dataVisualWords;
+    GVector* labelsVisualWords;
+    Matrix* dictionary;
 
-        bool storeTrainData;
-        bool storePredictedData;
+    //machine learning stuffs
+    Matrix* histogramsTraining;
+    GVector* labelsTraining;
+    Matrix* histogramsPredictSamples;
+    GVector* labelsPredicted;
 
-        void* classifier;
+    bool storeVisualWordsData;
+    bool storeTrainData;
+    bool storePredictedData;
 
-        FreeFunction freeFunction2SamplerOutput;
-        FreeFunction freeFunctionClassifier;
+    void* classifier;
 
-        ArgumentList* argumentListOfSampler;
-        ArgumentList* argumentListOfFeatureExtractor;
-        ArgumentList* argumentListOfClustering;
-        ArgumentList* argumentListOfDistanceFunction;
-        ArgumentList* argumentListOfHistogramMounter;
+    FreeFunction freeFunction2SamplerOutput;
+    FreeFunction freeFunctionClassifier;
 
-        FeatureExtractorFunction featureExtractorFunction;
-        ImageSamplerFunction imageSamplerFunction;
-        DistanceFunction distanceFunction;
-        ClusteringFunction clusteringFunction;
-        MountHistogramFunction mountHistogramFunction;
-        FitFunction fitFunction;
-        PredictFunction predictFunction;
+    ArgumentList* argumentListOfSampler;
+    ArgumentList* argumentListOfFeatureExtractor;
+    ArgumentList* argumentListOfClustering;
+    ArgumentList* argumentListOfDistanceFunction;
+    ArgumentList* argumentListOfHistogramMounter;
+
+    FeatureExtractorFunction featureExtractorFunction;
+    ImageSamplerFunction imageSamplerFunction;
+    DistanceFunction distanceFunction;
+    ClusteringFunction clusteringFunction;
+    MountHistogramFunction mountHistogramFunction;
+    FitFunction fitFunction;
+    PredictFunction predictFunction;
+
+    Image* currentImage;
 }BagOfVisualWordsManager;
 
 BagOfVisualWordsManager* createBagOfVisualWordsManager();
@@ -87,8 +96,9 @@ GVector* computeCountHistogram_bow(Matrix* featureMatrix,BagOfVisualWordsManager
 //
 
 
-
-void computeDictionary(BagOfVisualWordsManager* bagOfVisualWordsManager);
+void generateAllVisualWords(BagOfVisualWordsManager *bagOfVisualWordsManager);
+void computeDictionary(BagOfVisualWordsManager *bagOfVisualWordsManager);
+void GenerateHistogramsForDataTrain(BagOfVisualWordsManager* bagOfVisualWordsManager);
 void trainClassifier(BagOfVisualWordsManager* bagOfVisualWordsManager);
 GVector* predictLabels(BagOfVisualWordsManager* bagOfVisualWordsManager);
 

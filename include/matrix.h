@@ -24,12 +24,17 @@ void reshapeMatrix(Matrix* matrix, size_t nrows, size_t ncols);
 void stackVerticallyMatrices(Matrix** matrix1,Matrix* matrix2);
 void destroyMatrix(Matrix **pMatrix);
 Matrix* copyMatrix(Matrix* matrix);
+void swapMatrixRows(Matrix* matrix, size_t index1, size_t index2);
+void removeMatrixRow(Matrix* matrix, size_t rowIndex);
+Matrix* getMatrixRows(Matrix* matrix, int startRow,int endRow);
+Matrix* getMatrixRows(Matrix* matrix, int* indices,int n);
+void destroyMatrixVoidPointer(void* matrix);
 
 inline void copyMatrixRow(Matrix* matrix1,Matrix* matrix2, size_t rowIndex1,size_t rowIndex2){
     size_t nbytes =  matrix1->matrixData->elementSize*matrix1->numberColumns;
     size_t memoryShift1 = matrix1->numberColumns*rowIndex1*matrix1->matrixData->elementSize;
     size_t memoryShift2 = matrix2->numberColumns*rowIndex2*matrix2->matrixData->elementSize;
-    memcpy( ((unsigned char*)matrix1->matrixData->data)+memoryShift1,
+    memmove( ((unsigned char*)matrix1->matrixData->data)+memoryShift1,
            ((unsigned char*)matrix2->matrixData->data)+memoryShift2,
            nbytes);
 }

@@ -18,8 +18,9 @@
 
 
 typedef struct _kernel {
-  AdjacencyRelation *adjacencyRelation;
-  float *weight;
+    AdjacencyRelation *adjacencyRelation;
+    float *weight;
+    int nchannels;
 } Kernel;
 
 //aloca memoria para a estrutura do kernel e cria uma relacao de adjacencia e inicializa os pesos

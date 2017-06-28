@@ -34,3 +34,5 @@
 
 # Mac osx
 *.DS_Store
+
+*.bin

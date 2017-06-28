@@ -4,6 +4,7 @@ Kernel *createKernel(AdjacencyRelation *adjRel){
     Kernel* kernel = NULL;
     size_t size = adjRel->n;
     kernel  = (Kernel*) calloc(1,sizeof(Kernel));
+    kernel->nchannels = 1;
     kernel->adjacencyRelation = copyAdjcencyRelation(adjRel);
     kernel->weight = (float*)calloc( size , sizeof(float) );
     return kernel;
@@ -165,7 +166,7 @@ Kernel* createSobelHorizontalGradientKernel(int height,int width){
         }
         startValue -= 1;
     }
-
+    destroyAdjacencyRelation(&adjacencyRelation);
     return kernel;
 }
 
@@ -173,6 +174,7 @@ Kernel* createSobelHorizontalGradientKernel(AdjacencyRelation* adjacencyRelation
     //assuming rectangular symmetric kernel
     int height = (adjacencyRelation->maxDy*2)+1;
     int width =  (adjacencyRelation->maxDx*2)+1;
+    printf("%d %d\n",height,width);
     return createSobelHorizontalGradientKernel(height,width);
 }
 
@@ -204,7 +206,7 @@ Kernel* createSobelVerticalGradientKernel(int height,int width){
         }
         startValue -= 1;
     }
-
+    destroyAdjacencyRelation(&adjacencyRelation);
     return kernel;
 }
 

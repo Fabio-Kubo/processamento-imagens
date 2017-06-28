@@ -72,6 +72,39 @@ inline double* myInsertionSort(double* vector, size_t n){
     return auxVector;
 }
 
+//option = 0 : vertical
+//option = 1 : horizontal;
+inline Matrix* computeMatrixMean(Matrix* matrix, int option = 0){
+    Matrix* output = NULL;
+    if(option == 0){
+        output = createMatrix(1,matrix->numberColumns,matrix->numberElements);
+        for (int i = 0; i < matrix->numberRows; ++i) {
+            for (int j = 0; j < matrix->numberColumns; ++j) {
+                MATRIX_GET_ELEMENT_PO_AS(float,output,0,j) += MATRIX_GET_ELEMENT_PO_AS(float,matrix,i,j);
+            }
+        }
+
+        for (int j = 0; j < matrix->numberColumns; ++j) {
+            MATRIX_GET_ELEMENT_PO_AS(float,output,0,j) /= matrix->numberColumns;
+        }
+
+    }else if(option == 1){
+        output = createMatrix(matrix->numberRows,1,matrix->numberElements);
+        for (int i = 0; i < matrix->numberRows; ++i) {
+            for (int j = 0; j < matrix->numberColumns; ++j) {
+                MATRIX_GET_ELEMENT_PO_AS(float,output,i,0) += MATRIX_GET_ELEMENT_PO_AS(float,matrix,i,j);
+            }
+        }
+
+        for (int j = 0; j < matrix->numberColumns; ++j) {
+            MATRIX_GET_ELEMENT_PO_AS(float,output,0,j) /= matrix->numberColumns;
+        }
+
+
+    }
+
+    return output;
+}
 
 
 #endif //LIBFL_MATRIXUTIL_H

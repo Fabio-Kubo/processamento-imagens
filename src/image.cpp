@@ -24,6 +24,12 @@ Image* createImage(int nx, int ny,int nchannels){
     image->nchannels = nchannels;
     findAppropriateColorSpace(image);
     image->dataTypeId = FLOAT;
+    image->imageROI.coordinateX = 0;
+    image->imageROI.coordinateY = 0;
+    image->imageROI.coordinateZ = 0;
+    image->imageROI.size_x = image->nx;
+    image->imageROI.size_y = image->ny;
+    image->imageROI.size_z = image->nz;
     for (int i = 0; i < image->nchannels; ++i) {
         image->channel[i] = (float*)calloc(image->numberPixels,sizeof(float));
         //image->channel[i] = (float*)calloc(image->numberPixels,sizeof(float*));
@@ -49,6 +55,12 @@ Image* createImage(int nx, int ny,int nz, int nchannels){
     image->nchannels = nchannels;
     findAppropriateColorSpace(image);
     image->dataTypeId = FLOAT;
+    image->imageROI.coordinateX = 0;
+    image->imageROI.coordinateY = 0;
+    image->imageROI.coordinateZ = 0;
+    image->imageROI.size_x = image->nx;
+    image->imageROI.size_y = image->ny;
+    image->imageROI.size_z = image->nz;
     for (int i = 0; i < image->nchannels; ++i) {
         image->channel[i] = (float*)calloc(image->numberPixels,sizeof(float));
         //image->channel[i] = (float*)calloc(image->numberPixels,sizeof(float*));
@@ -72,6 +84,12 @@ Image* createImage(int nx, int ny){
     image->nchannels = 1;
     image->colorSpace = GRAYSCALE;
     image->dataTypeId = FLOAT;
+    image->imageROI.coordinateX = 0;
+    image->imageROI.coordinateY = 0;
+    image->imageROI.coordinateZ = 0;
+    image->imageROI.size_x = image->nx;
+    image->imageROI.size_y = image->ny;
+    image->imageROI.size_z = image->nz;
     for (int i = 0; i < image->nchannels; ++i) {
         image->channel[i] = (float*)calloc(image->numberPixels,sizeof(float*));
     }
@@ -93,6 +111,7 @@ void findAppropriateColorSpace(Image* image){
 
 void destroyImage(Image**image ){
     if((*image) == NULL){
+
         return;
     }
     for (int i = 0; i < (*image)->nchannels; ++i) {
@@ -1142,6 +1161,23 @@ void printImage(Image* image){
         }
         printf("\n");
     }
+}
+
+void printImageInfo(Image* image){
+    printf("number of voxels: %d x %d x %d = %d \n",image->nx,image->ny,image->nz, image->numberPixels);
+    printf("voxel size: %f x %f x %f  %s\n",image->dx,image->dy,image->dz, image->unid);
+    printf("number channels: %d \n",image->nchannels);
+    printf("channel depth: %d \n",image->channelDepth);
+    printf("scaling factor: %d \n",image->scalingFactor);
+    printf("color space Id: %d \n",image->colorSpace);
+    printf("ROI: x = %f y = %f z = %f sizeX: %f sizeY: %f sizeZ: %f \n",image->imageROI.coordinateX,image->imageROI.coordinateY,image->imageROI.coordinateZ,
+           image->imageROI.size_x,image->imageROI.size_y,image->imageROI.size_z);
+}
+
+void printImageRegionOfInterest(RegionOfInterest* regionOfInterest){
+    printf("X:%f Y:%f Z:%f sizeX:%f sizeY:%f sizeZ:%f\n",regionOfInterest->coordinateX,
+           regionOfInterest->coordinateY,regionOfInterest->coordinateZ,regionOfInterest->size_x,
+           regionOfInterest->size_y,regionOfInterest->size_z);
 }
 
 Image* createAlphaChannel(Image* image,float alpha){

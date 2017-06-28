@@ -38,6 +38,16 @@ enum DataType {
 };
 
 
+typedef struct _RegionOfInterest {
+    float coordinateX;
+    float coordinateY;
+    float coordinateZ;
+    float size_x;
+    float size_y;
+    float size_z;
+}RegionOfInterest;
+
+
 typedef struct _image {
     int   nx,ny,nz;    /* dimensoes da imagem */
     float dx,dy, dz;    /* tamanho do pixel em unidades de comprimento */
@@ -49,7 +59,10 @@ typedef struct _image {
     int nchannels;
     ColorSpace colorSpace;
     DataType dataTypeId;
+    RegionOfInterest imageROI;
 } Image;
+
+
 
 
 //macro para facil acesso aos pixels da imagem. a macro computa o indice para acessar a posicao (x,y) da imagem
@@ -58,6 +71,7 @@ typedef struct _image {
 #define imageVolume(image, x, y,z) image->channel[0][(z*image->ny*image->nx) + (y*image->nx) + x]
 #define imageVolumeCh(image, x, y, z,c) image->channel[c][(z*image->ny*image->nx) + (y*image->nx) + x]
 
+#define areImagesSameDimension(image1, image2) ( (image1->nx == image2->nx) && (image1->ny == image2->ny) && (image1->nz == image2->nz) )
 
 Image* createImage(int nx, int ny,int nchannels);
 Image* createImage(int nx, int ny,int nz, int nchannels);
@@ -82,12 +96,16 @@ void writeImageJPEG(Image *image,char *filename);
 void writeImageTIFF(Image *image,char *filename);
 void writeImage(Image* image, char *filename);
 bool isValidPixelCoordinate(Image *image,int pixelCoordinateX,int pixelCoordinateY);
+
+
 Image *imageSubtraction(Image *image1, Image *image2, bool saturation);
 bool isImagesSameDomain(Image *image1,Image *image2);
 Image *convertRGBtoYCbCr(Image *rgbImage);
 float sumUpAllPixelsValues(Image *image, bool normalize);
 Image* extractImageChannel(Image* image, int channel);
 void printImage(Image* image);
+void printImageInfo(Image* image);
+void printImageRegionOfInterest(RegionOfInterest* regionOfInterest);
 Image* createAlphaChannel(Image* image,float alpha);
 Image* convertGrayImage2RGBImage(Image* image_ppm);
 Image* mergeImages(Image* image1, Image* image2);
