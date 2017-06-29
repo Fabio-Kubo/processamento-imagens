@@ -20,6 +20,7 @@ Matrix* computeColorHistogram(GVector* vector_images,size_t nbinsPerChannel,size
 }
 
 HogManager* createHogManager() {
+    printf("[createHogManager] creating hog manager.\n");
     HogManager* hogManager = (HogManager*)calloc(1,sizeof(HogManager));
     hogManager->binSize = 20;
     hogManager->cellSizeX = 8;
@@ -117,17 +118,12 @@ Matrix* computeHogDescriptorForRegionsOfInterest(GVector* vector_ROIs, HogManage
     int shift = 0;
     size_t nrows = vector_ROIs->size;
     size_t ncols = 0;
-    printf("start\n");
     for (int i = 0; i < vector_ROIs->size; ++i) {
         Image* workImage = hogManager->image;
         Image *subImage = VECTOR_GET_ELEMENT_AS(Image*,vector_ROIs,i);
-        printf("a\n");
-        printf("%d\n", workImage->nx);
-        RegionOfInterest regionOfInterest = subImage->imageROI;
-        printf("b\n");
-        //RegionOfInterest regionOfInterest =  VECTOR_GET_ELEMENT_AS(RegionOfInterest, vector_ROIs, i);
+        //RegionOfInterest regionOfInterest = subImage->imageROI;
+        RegionOfInterest regionOfInterest =  VECTOR_GET_ELEMENT_AS(RegionOfInterest, vector_ROIs, i);
         workImage->imageROI = regionOfInterest;
-        printf("c\n");
         computeHogDescriptor(hogManager);
         if(featureVector_hog){
             float* data = (float*)featureVector_hog->data;
@@ -151,7 +147,7 @@ Matrix* computeHogDescriptorForRegionsOfInterest(GVector* vector_ROIs, HogManage
     destroyVector(&(matrix->matrixData));
     matrix->matrixData = featureVector_hog;
     // printf("%d %d\n", matrix->numberRows, matrix->numberColumns);
-    //MATRIX_PRINT_AS(float,"%f ",matrix);
+    MATRIX_PRINT_AS(float,"%f ",matrix);
     return matrix;
 }
 

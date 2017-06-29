@@ -369,9 +369,9 @@ void trainClassifier(BagOfVisualWordsManager* bagOfVisualWordsManager){
         VECTOR_GET_ELEMENT_AS(int,imagesLabels,index) = findTrueLabelInName(imagePath);
 
         destroyImage(&image);
+        destroyVector(&samplingResults);
         destroyMatrix(&featureMatrix);
         destroyVector(&histogram);
-        destroyVector(&samplingResults);
     }
 
     printf("[trainClassifier] Histograms and labels generated\n");
@@ -444,9 +444,9 @@ void GenerateHistogramsForDataTrain(BagOfVisualWordsManager* bagOfVisualWordsMan
         VECTOR_GET_ELEMENT_AS(int,imagesLabels,index) = findTrueLabelInName(imagePath);
 
         destroyImage(&image);
+        destroyVector(&samplingResults);
         destroyMatrix(&featureMatrix);
         destroyVector(&histogram);
-        destroyVector(&samplingResults);
     }
 
     printf("[GenerateHistogramsForDataTrain] Histograms and labels generated\n");
@@ -502,6 +502,7 @@ GVector* predictLabels(BagOfVisualWordsManager* bagOfVisualWordsManager){
             continue;
         }
         GVector* samplingResults = NULL;
+        bagOfVisualWordsManager->currentImage = image;
         if(bagOfVisualWordsManager->imageSamplerFunction){
             samplingResults = bagOfVisualWordsManager->imageSamplerFunction(image,
                                                                             bagOfVisualWordsManager);
