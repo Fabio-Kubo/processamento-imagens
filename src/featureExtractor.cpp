@@ -90,8 +90,6 @@ void compudeGradientImage(HogManager* hogManager){
 
     }
 
-
-
     destroyKernel(&kernelX);
     destroyKernel(&kernelY);
     destroyImage(&sobelX);
@@ -101,19 +99,35 @@ void compudeGradientImage(HogManager* hogManager){
     hogManager->gradientImagePhase = gradientphase;
 }
 
+void removeNegativeROIImages(GVector * images) {
+    Image * image;
+
+    for (int i = 0; i < images->size; ++i) {
+        image = VECTOR_GET_ELEMENT_AS(Image *, images, i);
+        if (image->imageROI.coordinateX < 0 || image->imageROI.coordinateY < 0) {
+            removeElementInVectorAt(images, i);
+            i--; // verifica de novo a posicao que teve imagem removida
+        }
+    }
+}
+
 Matrix* computeHogDescriptorForRegionsOfInterest(GVector* vector_ROIs, HogManager* hogManager){
     //Matrix* matrix = createMatrix(vector_ROIs->size,totalNumberBins,sizeof(float));
     GVector* featureVector_hog = NULL;
     int shift = 0;
     size_t nrows = vector_ROIs->size;
     size_t ncols = 0;
-    printf("asda\n");
-    printf("cam: %d\n", vector_ROIs->size);
+    printf("start\n");
     for (int i = 0; i < vector_ROIs->size; ++i) {
         Image* workImage = hogManager->image;
         Image *subImage = VECTOR_GET_ELEMENT_AS(Image*,vector_ROIs,i);
+        printf("a\n");
+        printf("%d\n", workImage->nx);
         RegionOfInterest regionOfInterest = subImage->imageROI;
+        printf("b\n");
+        //RegionOfInterest regionOfInterest =  VECTOR_GET_ELEMENT_AS(RegionOfInterest, vector_ROIs, i);
         workImage->imageROI = regionOfInterest;
+        printf("c\n");
         computeHogDescriptor(hogManager);
         if(featureVector_hog){
             float* data = (float*)featureVector_hog->data;
@@ -134,12 +148,10 @@ Matrix* computeHogDescriptorForRegionsOfInterest(GVector* vector_ROIs, HogManage
         }
     }
     Matrix* matrix = createMatrix(nrows,ncols,sizeof(float));
-    printf("cam: %d %d\n", nrows, ncols);
-    //destroyMatrix(&matrix);
     destroyVector(&(matrix->matrixData));
     matrix->matrixData = featureVector_hog;
-    MATRIX_PRINT_AS(float,"%f ",matrix);
-    printf("%lu %lu\n",matrix->numberRows,matrix->numberColumns);
+    // printf("%d %d\n", matrix->numberRows, matrix->numberColumns);
+    //MATRIX_PRINT_AS(float,"%f ",matrix);
     return matrix;
 }
 
@@ -222,10 +234,10 @@ void computeHogDescriptor(HogManager* hogManager){
 
     //for each block
     while(y_block_start < height && x_block_start < width){
-        //printf("[computeHogDescriptor] block [%d %d]\n",x_block_start,y_block_start);
+        // printf("[computeHogDescriptor] block [%d %d]\n",x_block_start,y_block_start);
 
         if(x_block_start + blockSizeX > width || y_block_start + blockSizeY > height){
-            //printf("[computeHogDescriptor] skip block [%d %d]\n",x_block_start,y_block_start);
+            // printf("[computeHogDescriptor] skip block [%d %d]\n",x_block_start,y_block_start);
             x_block_start += strideX;
             if(x_block_start >= width){
                 x_block_start = startX;
@@ -241,11 +253,10 @@ void computeHogDescriptor(HogManager* hogManager){
         y_cell_start = y_block_start;
         float *histogramBlock = NULL;
         int sizeHistogramBlock = 0;
-        printf("cam: %d %d\n", y_block_end, x_block_end);
         while(y_cell_start < y_block_end && x_cell_start < x_block_end){
             x_cell_end = x_cell_start + hogManager->cellSizeX;
             y_cell_end = y_cell_start +  hogManager->cellSizeY;
-            printf("[computeHogDescriptor] cell [%d %d]\n",x_cell_start,y_cell_start);
+            // printf("[computeHogDescriptor] cell [%d %d]\n",x_cell_start,y_cell_start);
             histogramCell = (float*)calloc(nBins,sizeof(float));
 
             //compute histogram for cell
@@ -289,12 +300,13 @@ void computeHogDescriptor(HogManager* hogManager){
             for (int i = 0; i < nBins; ++i) {
                 histogramMagnitudeCell += histogramCell[i]*histogramCell[i];
             }
-            if(histogramMagnitudeCell <= 0){
-                continue;
-            }
 
             histogramMagnitudeCell = sqrt(histogramMagnitudeCell);
             for (int i = 0; i < nBins; ++i) {
+                if (histogramMagnitudeCell <= 0) {
+                    histogramCell[i] = 0;
+                    continue;
+                }
                 histogramCell[i] /= histogramMagnitudeCell;
             }
 
@@ -317,11 +329,13 @@ void computeHogDescriptor(HogManager* hogManager){
         for (int i = 0; i < sizeHistogramBlock; ++i) {
             histogramMagnitudeBlock += histogramBlock[i]*histogramBlock[i];
         }
-        if(histogramMagnitudeBlock <= 0){
-            continue;
-        }
+
         histogramMagnitudeBlock = sqrt(histogramMagnitudeBlock);
         for (int i = 0; i < sizeHistogramBlock; ++i) {
+            if (histogramMagnitudeBlock <= 0) {
+                histogramBlock[i] = 0;
+                continue;
+            }
             histogramBlock[i] /= histogramMagnitudeBlock;
         }
 
@@ -354,9 +368,9 @@ void destroyHogManager(HogManager** pHogManager){
     if(aux == NULL){
         return;
     }
-    if(aux->image){
+    /*if(aux->image){
         destroyImage(&(aux->image));
-    }
+    }*/
     if(aux->gradientImagePhase){
         destroyImage(&(aux->gradientImagePhase));
     }
@@ -367,6 +381,7 @@ void destroyHogManager(HogManager** pHogManager){
         free(aux->hogFeatureVector);
     }
     free(*pHogManager);
+    (*pHogManager) = NULL;
 }
 
 

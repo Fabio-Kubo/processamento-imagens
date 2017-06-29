@@ -1,4 +1,4 @@
-//
+  //
 // Created by deangeli on 5/20/17.
 //
 
@@ -10,5 +10,6 @@
 
 GVector* gridSampling(Image* image, size_t patchSizeX,size_t patchSizeY);
 
+GVector* randomSampling_noImage(Image* image, size_t numberOfPatchs, size_t patchSizeX,size_t patchSizeY,int seed);
 
 #endif //LIBFL_SAMPLING_H

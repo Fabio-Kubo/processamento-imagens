@@ -85,7 +85,7 @@ GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, i
             if (y >= labels->ysize - 1)
               border.end.y = labels->ysize - 1;
 
-            int label = labels->val[y*labels->xsize + x];
+            //int label = labels->val[y*labels->xsize + x];
             /*imageValCh(img, x, y, 0) = label;
             imageValCh(img, x, y, 1) = label;
             imageValCh(img, x, y, 2) = label;*/
@@ -124,12 +124,15 @@ GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, i
               imageValCh(img, x, y, 2) = 0;
 
               Image *subImage = extractSubImage(img, x, y,patchSize, patchSize, true);
-              subImage->imageROI.coordinateX = x - (patchSize / 2);
-              subImage->imageROI.coordinateY = y - (patchSize / 2);
+              subImage->imageROI.coordinateX = x - patchSize / 2;
+              subImage->imageROI.coordinateY = y - patchSize / 2;
               subImage->imageROI.coordinateZ = 0;
               subImage->imageROI.size_x = patchSize;
               subImage->imageROI.size_y = patchSize;
               subImage->imageROI.size_z = 1;
+              //printf("x:%d  y:%d \n", x, y);
+              //printf("patchSize: %d\n", patchSize/2);
+              //printf("Cx:%f Cy:%f\n", subImage->imageROI.coordinateX, subImage->imageROI.coordinateY);
               VECTOR_GET_ELEMENT_AS(Image*,vector_images,k) = subImage;
               k++;
 

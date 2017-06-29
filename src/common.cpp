@@ -86,7 +86,7 @@ int NCFgets(char *s, int m, FILE *f) {
 http://www.ime.usp.br/~pf/algoritmos/aulas/random.html
  **/
 
-int RandomInteger (int low, int high){
+int randomInteger (int low, int high){
     int k;
     double d;
 

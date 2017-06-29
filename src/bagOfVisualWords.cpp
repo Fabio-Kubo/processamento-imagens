@@ -98,13 +98,27 @@ GVector* gridSamplingBow(Image* image, BagOfVisualWordsManager* bagOfVisualWords
     }else if(argumentList->length == 2){
         size_t patchSizeX = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,0);
         size_t patchSizeY = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,1);
+        printf("[gridSampling] generating grid samples.\n");
         return gridSampling(image,patchSizeX,patchSizeY);
-    }else{
-        return NULL;
     }
+
     return NULL;
 }
 
+GVector* randomSamplingBow(Image* image, BagOfVisualWordsManager* bagOfVisualWordsManager){
+    ArgumentList* argumentList = bagOfVisualWordsManager->argumentListOfSampler;
+
+    if(argumentList->length < 4){
+        printf("[randomSampling] invalid argument list");
+        return NULL;
+    }
+    size_t nPatches = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,0);
+    size_t patchSizeX = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,1);
+    size_t patchSizeY = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,2);
+    size_t seed = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,3);
+    printf("[randomSampling] generating random samples.\n");
+    return randomSampling_noImage(image, nPatches, patchSizeX, patchSizeY, seed);
+}
 
 
 Matrix* computeColorHistogramBow(GVector* vector,BagOfVisualWordsManager* bagOfVisualWordsManager){
@@ -149,8 +163,7 @@ Matrix* computeHogDescriptorCustom(GVector* vector, BagOfVisualWordsManager* bag
     hogManager->strideY = hogManager->cellSizeY;
 
     hogManager->image = bagOfVisualWordsManager->currentImage;
-    computeHogDescriptor(hogManager);
-
+    printf("[computeHog] computing hog\n");
     Matrix *matrix = computeHogDescriptorForRegionsOfInterest(vector,hogManager);
 
     destroyHogManager(&hogManager);

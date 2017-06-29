@@ -111,7 +111,7 @@ typedef enum ift_axis_order {
 #define iftSquaredVoxelDistance(u,v) ((u.x-v.x)*(u.x-v.x)+(u.y-v.y)*(u.y-v.y)+(u.z-v.z)*(u.z-v.z))
 
 /* @brief Computes the Smooth Euclidean Distances from a pre-computed Squared Euclidean distance among 26-neighbors
- * @param squared_dist The pre-computed Squared Euclidean Distance among 26-neighbors. The details are in N. Kiryati and G. Sze kely, "Estimating shortest paths and minimal distances on digitized three-dimensional surfaces," Pattern Recognition, vol. 26, pp. 1623-1637, 1993. 
+ * @param squared_dist The pre-computed Squared Euclidean Distance among 26-neighbors. The details are in N. Kiryati and G. Sze kely, "Estimating shortest paths and minimal distances on digitized three-dimensional surfaces," Pattern Recognition, vol. 26, pp. 1623-1637, 1993.
  * @return The resulting Smooth Euclidean Distance
  */
 #define iftSmoothEuclideanDistance(squared_dist) ((fabs(squared_dist-1)<1.0e-6)? 0.9016 : (fabs(squared_dist-2)<1.0e-6)? 1.289 : 1.615 )
@@ -211,7 +211,7 @@ timer *iftToc(void);
 /**
  * @brief Prints the computational time from tstart to tend, as obtained by iftTic() and iftToc() functions.
  */
-void iftPrintCompTime(timer *tstart, timer *tend, const char *msg, ...); 
+void iftPrintCompTime(timer *tstart, timer *tend, const char *msg, ...);
 
 /**
  * @brief Computes the difference in ms from the initial time to the final time.
@@ -596,9 +596,9 @@ int iftSafeMod(int a, int n);
 /**
  * @brief Gets an Integer Array with the Unique Elements from an Input Array.
  *
- * Ex: Given the array = [1, 2, 3, 4, 4, 3, 2, 1], with size n = 8, the resulting array of unique elements will be: 
+ * Ex: Given the array = [1, 2, 3, 4, 4, 3, 2, 1], with size n = 8, the resulting array of unique elements will be:
  * [1, 2, 3, 4]
- * 
+ *
  * @param  array Input Int Array to be scanned.
  * @param  n     Number of Elements from the Input Int Array.
  * @return       An Integer Array with the Unique Elements from <b>array</b>.
@@ -737,7 +737,7 @@ int iftFindIntArrayElementIndex(int *x, int n, int elem);
  * @brief Compute the Gaussian Probability Density Function for a set of values.
  * @author Samuel Martins
  * @date May 12, 2016
- * 
+ *
  * @param  vals   Array of Values to compute the Gaussian PDF.
  * @param  n_vals Number of values.
  * @param  mean   Mean used to compute the Gaussian PDF.
@@ -755,7 +755,7 @@ double *iftGaussPDF(double *vals, size_t n_vals, double mean, double stdev);
  * It gives the Area under the Probability Density Function (Normal Distribution) from minus infinity to x. \n
  * Then, it also describes the probability that a random variable X takes on a value less than or
  * equal to a number x. \n
- * 
+ *
  * @param  x      Value from the Random Variable to compute the CDF.
  * @param  mean   Mean used to compute the Gaussian PDF.
  * @param  stdev  Standard Deviation used to compute the Gaussian PDF.

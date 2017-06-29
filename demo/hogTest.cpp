@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
     hogManager->strideY = hogManager->cellSizeY;
     //computeHogDescriptor(hogManager);
 
-    GVector *vector = randomSampling_noImage(seila,4,patchSizeX,patchSizeY);
+    GVector *vector = randomSampling_noImage(seila,8,patchSizeX,patchSizeY, 0);
     for (int i = 0; i < vector->size; ++i) {
         RegionOfInterest ROI = VECTOR_GET_ELEMENT_AS(RegionOfInterest,vector,i);
         printImageRegionOfInterest(&ROI);

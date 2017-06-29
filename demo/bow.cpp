@@ -6,6 +6,7 @@
  * 0 -> None
  * 1 -> Grid
  * 2 -> SuperPixel
+ * 3 -> Random sampling
  *
  * FEATURE EXTRACTORS:
  * 0 -> Color Histogram
@@ -18,7 +19,7 @@
  * 0 -> SVM
  * 1 -> k-means
  */
-#define SAMPLER 2
+#define SAMPLER 1
 #define FEATURE_EXTRACTOR 1
 #define CLUSTERING 0
 #define CLASSIFIER 0
@@ -29,8 +30,12 @@
 #define SP_BETA 10
 #define N_SP_ITERATIONS 10
 #define N_SP_SMOOTH_ITERATIONS 0
-#define SP_PATCH_SIZE 16
+#define SP_PATCH_SIZE 32
 #define SP_MAX_SAMPLES 64
+
+// Random sampling.
+#define N_RANDOM_PATCHES 4
+#define RANDOM_SEED 0
 
 // Grid sampling.
 #define GRID_PATCH_SIZE 32
@@ -128,6 +133,17 @@ int main(int argc, char **argv) {
             ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, N_SP_SMOOTH_ITERATIONS);
             ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, SP_PATCH_SIZE);
             ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, SP_MAX_SAMPLES);
+            bowManager->argumentListOfSampler = samplingArguments;
+            break;
+        }
+
+        case 3: {
+            printf("Random Sampling. ##\n");
+            bowManager->imageSamplerFunction = randomSamplingBow;
+            ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, N_RANDOM_PATCHES);
+            ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, GRID_PATCH_SIZE);
+            ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, GRID_PATCH_SIZE);
+            ARGLIST_PUSH_BACK_AS(size_t, samplingArguments, RANDOM_SEED);
             bowManager->argumentListOfSampler = samplingArguments;
             break;
         }

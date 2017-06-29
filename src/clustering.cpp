@@ -50,7 +50,7 @@ Matrix* kmeansClustering(Matrix* featureMatrix, size_t nClusters,
     size_t k = 0;
     bool *isUsed = (bool*)calloc(featureMatrix->numberRows,sizeof(*isUsed));
     while (k < nClusters) {
-        int randomIndex = RandomInteger(0,featureMatrix->numberRows-1);
+        int randomIndex = randomInteger(0,featureMatrix->numberRows-1);
         if(isUsed[randomIndex] == false){
             copyMatrixRow(centroides_old,featureMatrix,k,randomIndex);
             isUsed[randomIndex] = true;

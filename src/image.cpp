@@ -111,13 +111,11 @@ void findAppropriateColorSpace(Image* image){
 
 void destroyImage(Image**image ){
     if((*image) == NULL){
-
         return;
     }
     for (int i = 0; i < (*image)->nchannels; ++i) {
         free((*image)->channel[i]);
     }
-
     free((*image)->channel);
     free((*image));
     (*image) = NULL;
