@@ -61,7 +61,7 @@ GVector* randomSampling_noImage(Image* image, size_t numberOfPatchs, size_t patc
         regionOfInterest.size_y = patchSizeY;
         regionOfInterest.size_z = 1;
 
-        VECTOR_GET_ELEMENT_AS(RegionOfInterest,vector,patchsGenerated) = regionOfInterest;
+        VECTOR_GET_ELEMENT_AS(RegionOfInterest*,vector,patchsGenerated) = &regionOfInterest;
         patchsGenerated++;
     }
 

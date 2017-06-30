@@ -121,9 +121,10 @@ Matrix* computeHogDescriptorForRegionsOfInterest(GVector* vector_ROIs, HogManage
     for (int i = 0; i < vector_ROIs->size; ++i) {
         Image* workImage = hogManager->image;
         Image *subImage = VECTOR_GET_ELEMENT_AS(Image*,vector_ROIs,i);
-        //RegionOfInterest regionOfInterest = subImage->imageROI;
-        RegionOfInterest regionOfInterest =  VECTOR_GET_ELEMENT_AS(RegionOfInterest, vector_ROIs, i);
-        workImage->imageROI = regionOfInterest;
+        RegionOfInterest regionOfInterest = subImage->imageROI;
+        //RegionOfInterest *regionOfInterest =  VECTOR_GET_ELEMENT_AS(RegionOfInterest*, vector_ROIs, i);
+        workImage->imageROI = *regionOfInterest;
+        //printf("%d\n", workImage->imageROI.coordinateX);
         computeHogDescriptor(hogManager);
         if(featureVector_hog){
             float* data = (float*)featureVector_hog->data;

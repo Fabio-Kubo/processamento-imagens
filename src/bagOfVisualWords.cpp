@@ -279,11 +279,14 @@ void computeDictionary(BagOfVisualWordsManager *bagOfVisualWordsManager){
         for (size_t j = 0; j < featureMatrix->numberRows; ++j) {
             VECTOR_PUSH_BACK(int,visualWordsLabels,trueLabelImage);
         }
+        printf("a\n");
         Matrix* newData = stackVerticallyMatrices(allFeatures,featureMatrix);
         destroyMatrix(&allFeatures);
         allFeatures = newData;
         destroyImage(&image);
+        printf("b\n");
         destroyVector(&samplingResults);
+        printf("c\n");
         destroyMatrix(&featureMatrix);
     }
 
