@@ -98,7 +98,7 @@ GVector* gridSamplingBow(Image* image, BagOfVisualWordsManager* bagOfVisualWords
     }else if(argumentList->length == 2){
         size_t patchSizeX = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,0);
         size_t patchSizeY = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,1);
-        printf("[gridSampling] generating grid samples.\n");
+        //printf("[gridSampling] generating grid samples.\n");
         return gridSampling(image,patchSizeX,patchSizeY);
     }
 
@@ -116,7 +116,7 @@ GVector* randomSamplingBow(Image* image, BagOfVisualWordsManager* bagOfVisualWor
     size_t patchSizeX = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,1);
     size_t patchSizeY = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,2);
     size_t seed = ARGLIST_GET_ELEMENT_AS(size_t,argumentList,3);
-    printf("[randomSampling] generating random samples.\n");
+    //printf("[randomSampling] generating random samples.\n");
     return randomSampling_noImage(image, nPatches, patchSizeX, patchSizeY, seed);
 }
 
@@ -163,7 +163,7 @@ Matrix* computeHogDescriptorCustom(GVector* vector, BagOfVisualWordsManager* bag
     hogManager->strideY = hogManager->cellSizeY;
 
     hogManager->image = bagOfVisualWordsManager->currentImage;
-    printf("[computeHog] computing hog\n");
+    //printf("[computeHog] computing hog\n");
     Matrix *matrix = computeHogDescriptorForRegionsOfInterest(vector,hogManager);
 
     destroyHogManager(&hogManager);
@@ -279,14 +279,11 @@ void computeDictionary(BagOfVisualWordsManager *bagOfVisualWordsManager){
         for (size_t j = 0; j < featureMatrix->numberRows; ++j) {
             VECTOR_PUSH_BACK(int,visualWordsLabels,trueLabelImage);
         }
-        printf("a\n");
         Matrix* newData = stackVerticallyMatrices(allFeatures,featureMatrix);
         destroyMatrix(&allFeatures);
         allFeatures = newData;
         destroyImage(&image);
-        printf("b\n");
         destroyVector(&samplingResults);
-        printf("c\n");
         destroyMatrix(&featureMatrix);
     }
 

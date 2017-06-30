@@ -23,6 +23,7 @@ GVector* gridSampling(Image* image, size_t patchSizeX,size_t patchSizeY){
             k++;
         }
     }
+    writeImagePNG(image,"bordergrid.png");
     return vector_images;
 }
 

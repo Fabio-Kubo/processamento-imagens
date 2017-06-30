@@ -57,6 +57,9 @@ iftImage* imageToIft(Image* image) {
 
 
 GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, int patchSize, int maxSamples) {
+    if (0 == maxSamples) {
+      maxSamples =(int) labels->ysize * labels->xsize;
+    }
     GVector* vector_images = createNullVector(maxSamples, sizeof(iftImage*));
     iftIntArray *allLabels = iftGetLabels(labels);
     iftBoundingBox border;
@@ -100,8 +103,7 @@ GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, i
             if (countAdjacents >= 3) {
               //printf("pixel %d: ", y*labels->xsize + x);
               //printf("poi: %d\n", countAdjacents);
-
-              for (int i = x - patchSize; i <= x + patchSize; i++) {
+              /*for (int i = x - patchSize; i <= x + patchSize; i++) {
                 if (i < 0) continue; if (i >= img->nx) continue;
                 for (int j = y - patchSize; j <= y + patchSize; j++) {
                   if (j < 0) continue; if (j >= img->ny) continue;
@@ -121,7 +123,7 @@ GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, i
 
               imageValCh(img, x, y, 0) = 255;
               imageValCh(img, x, y, 1) = 0;
-              imageValCh(img, x, y, 2) = 0;
+              imageValCh(img, x, y, 2) = 0;*/
 
               Image *subImage = extractSubImage(img, x, y,patchSize, patchSize, true);
               subImage->imageROI.coordinateX = x - patchSize / 2;

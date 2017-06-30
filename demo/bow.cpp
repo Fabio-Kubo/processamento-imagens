@@ -25,10 +25,10 @@
 #define CLASSIFIER 0
 
 // Super pixel sampling.
-#define N_SUPER_PIXELS 15
+#define N_SUPER_PIXELS 30
 #define SP_ALPHA 0.10f
-#define SP_BETA 10
-#define N_SP_ITERATIONS 10
+#define SP_BETA 20
+#define N_SP_ITERATIONS 20
 #define N_SP_SMOOTH_ITERATIONS 0
 #define SP_PATCH_SIZE 32
 #define SP_MAX_SAMPLES 64
@@ -38,7 +38,7 @@
 #define RANDOM_SEED 0
 
 // Grid sampling.
-#define GRID_PATCH_SIZE 32
+#define GRID_PATCH_SIZE 64
 
 // k-means Clustering.
 #define N_VISUAL_WORDS 1000
@@ -50,7 +50,7 @@
 
 // HOG.
 #define N_HOG_CELLS_PER_BLOCK 2
-#define N_HOG_CELL_SIZE 16
+#define N_HOG_CELL_SIZE 32
 #define HOG_BIN_SIZE 20
 
 int main(int argc, char **argv) {
