@@ -1,0 +1,135 @@
+#include "featureExtractor.h"
+#include "opencv2/core/core.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/opencv.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+
+using namespace cv;
+
+bool isValidROIPoint(RegionOfInterest * roi, HogManager * hogManager) {
+    bool isValid = true;
+    int sizeBlockX = hogManager->cellSizeX * hogManager->cellsPerBlockX;
+    int sizeBlockY = hogManager->cellSizeY * hogManager->cellsPerBlockY;
+    int sizeImageX = hogManager->image->nx;
+    int sizeImageY = hogManager->image->ny;
+
+    if (roi->coordinateX < 0 || roi->coordinateY < 0
+      || (roi->coordinateX + sizeBlockX) >= sizeImageX
+      || (roi->coordinateY + sizeBlockY) >= sizeImageY) {
+        isValid = false;
+    }
+    return isValid;
+}
+
+float * getBinValues(int binSize, int numberOfBins) {
+    float * binsCenter = (float*)calloc(numberOfBins,sizeof(float));
+
+    float value = binSize/2;
+    for (int i = 0; i < numberOfBins; ++i) {
+        binsCenter[i] = value;
+        value += binSize;
+    }
+    return binsCenter;
+}
+
+int getFloorWeigth(float angle, int floorIndex, int binSize, float * binValues){
+    return 1 - (angle - binValues[floorIndex]) / binSize;
+}
+
+void convertToImageCV(Image * image, Mat &imageCV) {
+    for (int y = 0; y < image->ny; ++y) {
+      for (int x = 0; x < image->nx; ++x) {
+        // get pixel
+        Vec3b color = imageCV.at<Vec3b>(cv::Point(x,y));
+        color[0] = imageValCh(image, x, y, 0);
+        color[1] = imageValCh(image, x, y, 1);
+        color[2] = imageValCh(image, x, y, 2);
+        // set pixel
+        imageCV.at<Vec3b>(cv::Point(x,y)) = color;
+      }
+    }
+}
+
+void removeInvalidROIPoints(GVector * roiPoints, Image * image, int sizeBlockX, int sizeBlockY) {
+    RegionOfInterest * roiPoint;
+
+    for (int i = 0; i < (int) roiPoints->size; ++i) {
+        roiPoint = VECTOR_GET_ELEMENT_AS(RegionOfInterest *, roiPoints, i);
+        if (roiPoint->coordinateX < 0 || roiPoint->coordinateY < 0
+            || roiPoint->coordinateX + sizeBlockX >= image->nx
+            || roiPoint->coordinateY + sizeBlockY >= image->ny) {
+            removeElementInVectorAt(roiPoints, i);
+            i--; // verifica de novo a posicao que teve imagem removida
+        }
+    }
+}
+
+int getHistogramBaseIndex(int nBins, int indexROI){
+    return indexROI * nBins;
+}
+
+Matrix* computeHogForRegionsOfInterestKubo(GVector* vector_ROIs, HogManager* hogManager){
+
+    int sizeBlockX = hogManager->cellSizeX * hogManager->cellsPerBlockX;
+    int sizeBlockY = hogManager->cellSizeY * hogManager->cellsPerBlockY;
+    int nTotalOfCells = hogManager->cellsPerBlockX * hogManager->cellsPerBlockY;
+    float range =  (hogManager->useUnsignedGradients)? 180 : 360;
+    int nBins = range/hogManager->binSize;
+    float * binValues = getBinValues(hogManager->binSize, nBins);
+
+    Matrix* matrix = createMatrix(vector_ROIs->size, nTotalOfCells*nBins,sizeof(float));
+    cv::Mat imageCV (hogManager->image->nx, hogManager->image->ny, CV_8UC3, Scalar(0, 0, 0));
+
+    printf("Convertedo to image to mat\n");
+    convertToImageCV(hogManager->image, imageCV);
+
+    printf("Calculando gradientes\n");
+    // Calculate gradients gx, gy by using image 1-derivative x and y direction
+    cv::Mat gx, gy;
+    Sobel(imageCV, gx, CV_32F, 1, 0, 1);
+    Sobel(imageCV, gy, CV_32F, 0, 1, 1);
+
+    //Calculate gradient magnitude and direction (in degrees)
+    cv::Mat magnitude, angle;
+    cartToPolar(gx, gy, magnitude, angle, 1);
+
+    removeInvalidROIPoints(vector_ROIs, hogManager->image, sizeBlockX, sizeBlockY);
+
+    RegionOfInterest * roi;
+    GVector* featureVector;
+
+    for (int i = 0; i < (int)vector_ROIs->size; ++i) {
+      roi =  VECTOR_GET_ELEMENT_AS(RegionOfInterest*, vector_ROIs, i);
+
+          featureVector = createNullVector(nTotalOfCells*nBins,sizeof(float));
+          //for each pixel, adds its magnitude to its histogram[floor(angle)] and histogram[floor(angle) + 1]
+          for (int pixelX = roi->coordinateX; pixelX < sizeBlockX; pixelX++) {
+              for (int pixelY = roi->coordinateY; pixelY < sizeBlockY; pixelY++) {
+                  int histogramBaseIndex = getHistogramBaseIndex(nBins, i);
+
+                  if(hogManager->useUnsignedGradients && angle.at<float>(pixelX, pixelY) >= 180){
+                    angle.at<float>(pixelX, pixelY)-= 180;
+                  }
+
+                  int floorAngleIndex = angle.at<float>(pixelX, pixelY) / hogManager->binSize;
+
+                  float floorWeigth = getFloorWeigth(angle.at<float>(pixelX, pixelY), floorAngleIndex, hogManager->binSize, binValues);
+                  float ceilingWeigth = 1 - floorWeigth;
+
+                  VECTOR_GET_ELEMENT_AS(float, featureVector, histogramBaseIndex + floorAngleIndex)
+                      += floorWeigth * magnitude.at<float>(pixelX, pixelY);
+
+                  if(ceilingWeigth != 0){
+                      VECTOR_GET_ELEMENT_AS(float, featureVector, histogramBaseIndex + floorAngleIndex + 1)
+                       += ceilingWeigth * magnitude.at<float>(pixelX, pixelY);
+                  }
+              }
+          }
+          setRowValueGivenVector(matrix, featureVector, i);
+          destroyVector(&featureVector);
+      }
+
+    free(binValues);
+
+    return matrix;
+}
