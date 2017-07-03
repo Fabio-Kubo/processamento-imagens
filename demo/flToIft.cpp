@@ -1,6 +1,10 @@
 #include "FL.h"
 #include "ift.h"
 
+
+/**
+ * Converte uma imagem da estrutura Image para uma iftImage
+ */
 iftImage* imageToIft(Image* image) {
     iftImage *newImage = iftCreateColorImage(image->nx, image->ny, image->nz);
     for (int y = 0; y < image->ny; y++) {
@@ -16,46 +20,12 @@ iftImage* imageToIft(Image* image) {
         }
     }
 
-    /*printf("%d\n", newImage->n);
-    printf("%d\n", newImage->xsize);
-    printf("%d\n", newImage->ysize);
-    printf("%d\n", newImage->zsize);
-    printf("%f\n", newImage->dx);
-    printf("%f\n", newImage->dy);
-    printf("%f\n", newImage->dz);*/
-
-    /*printf("%d\n", image->numberPixels);
-    printf("%d\n", image->nx);
-    printf("%d\n", image->ny);
-    printf("%d\n", image->nz);
-    printf("%f\n", image->dx);
-    printf("%f\n", image->dy);
-    printf("%f\n", image->dz);*/
-
-    /*for (int y = 0; y < image->ny; y++) {
-      for (int x = 0; x < image->nx; x++) {
-        printf("pixel %d: ", y*image->nx + x);
-        imageValCh(image, x, y, 0) = iftGetRGB(newImage, y*newImage->xsize + x, 256).val[0];
-        imageValCh(image, x, y, 1) = iftGetRGB(newImage, y*newImage->xsize + x, 256).val[1];
-        imageValCh(image, x, y, 2) = iftGetRGB(newImage, y*newImage->xsize + x, 256).val[2];
-      }
-    }*/
-
-    /*for (int y = 0; y < newImage->ysize; y++) {
-      for (int x = 0; x < newImage->xsize; x++) {
-        printf("pixel %d: ", y*newImage->xsize + x);
-        printf("%d ", iftGetRGB(newImage, y*newImage->xsize + x, 256).val[0]);
-        printf("%d ", iftGetRGB(newImage, y*newImage->xsize + x, 256).val[1]);
-        printf("%d\n", iftGetRGB(newImage, y*newImage->xsize + x, 256).val[2]);
-      }
-    }
-
-    printf("end\n");*/
-
     return newImage;
 }
 
-
+/**
+ * Converte uma imagem de labels na estrutura iftImage para um vetor de samples.
+ */
 GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, int patchSize, int maxSamples) {
     if (0 == maxSamples) {
       maxSamples =(int) labels->ysize * labels->xsize;
@@ -63,15 +33,11 @@ GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, i
     GVector* vector_images = createNullVector(maxSamples, sizeof(iftImage*));
     iftIntArray *allLabels = iftGetLabels(labels);
     iftBoundingBox border;
-
-    if (maxSamples == 0) {
-      maxSamples = INT_MAX;
-    }
-
     int countLabels, countAdjacents, stop = 0;
     unsigned int k = 0;
     for (int y = 0; y < labels->ysize && !stop; y++) {
         for (int x = 0; x < labels->xsize && !stop; x++) {
+            // Para cada pixel (x,y), cria uma vizinhança 3x3 ao redor deste.
             countAdjacents = 0;
             border.begin.x = x - 1;
             border.begin.y = y - 1;
@@ -88,43 +54,16 @@ GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, i
             if (y >= labels->ysize - 1)
               border.end.y = labels->ysize - 1;
 
-            //int label = labels->val[y*labels->xsize + x];
-            /*imageValCh(img, x, y, 0) = label;
-            imageValCh(img, x, y, 1) = label;
-            imageValCh(img, x, y, 2) = label;*/
-
-
+            // Conta a quantidade de cada label na vizinhança do pixel.
             for (unsigned int i = 0; i < allLabels->n; i++) {
               countLabels = iftCountObjectSpelsFromBoundingBox(labels, allLabels->val[i], border);
               if (countLabels > 0) {
                 countAdjacents++;
               }
             }
+            // Se a quantidade de labels na vizinhança for maior ou igual a 3,
+            // extraimos um sample centralizado naquele pixel.
             if (countAdjacents >= 3) {
-              //printf("pixel %d: ", y*labels->xsize + x);
-              //printf("poi: %d\n", countAdjacents);
-              /*for (int i = x - patchSize; i <= x + patchSize; i++) {
-                if (i < 0) continue; if (i >= img->nx) continue;
-                for (int j = y - patchSize; j <= y + patchSize; j++) {
-                  if (j < 0) continue; if (j >= img->ny) continue;
-                  imageValCh(img, i, j, 0) = 0;
-                  imageValCh(img, i, j, 1) = 255;
-                  imageValCh(img, i, j, 2) = 255;
-                }
-              }
-
-              for (int i = border.begin.x; i <= border.end.x; i++) {
-                for (int j = border.begin.y; j <= border.end.y; j++) {
-                  imageValCh(img, i, j, 0) = 255;
-                  imageValCh(img, i, j, 1) = 0;
-                  imageValCh(img, i, j, 2) = 255;
-                }
-              }
-
-              imageValCh(img, x, y, 0) = 255;
-              imageValCh(img, x, y, 1) = 0;
-              imageValCh(img, x, y, 2) = 0;*/
-
               Image *subImage = extractSubImage(img, x, y,patchSize, patchSize, true);
               subImage->imageROI.coordinateX = x - patchSize / 2;
               subImage->imageROI.coordinateY = y - patchSize / 2;
@@ -132,21 +71,23 @@ GVector* iftImageToVector(Image *img, iftImage *labels, int numberSuperPixels, i
               subImage->imageROI.size_x = patchSize;
               subImage->imageROI.size_y = patchSize;
               subImage->imageROI.size_z = 1;
-              //printf("x:%d  y:%d \n", x, y);
-              //printf("patchSize: %d\n", patchSize/2);
-              //printf("Cx:%f Cy:%f\n", subImage->imageROI.coordinateX, subImage->imageROI.coordinateY);
               VECTOR_GET_ELEMENT_AS(Image*,vector_images,k) = subImage;
               k++;
 
               if (k >= vector_images->size) stop = 1;
             }
         }
-        //writeImagePNG(img,"poi.png");
     }
+    // Caso a quantidade de samples extraidas seja menor que o tamanho do vetor,
+    // temos que reduzir o vetor para aquele tamanho para evitar problemas.
     resizeVector(vector_images, k - 1);
     return vector_images;
 }
 
+/**
+ * Utiliza a biblioteca ift para extrair uma imagem de labels representando
+ * os superpixels da imagem dada.
+ */
 iftImage *computeSuperPixels(iftImage *img, int nsuperpixels, float alpha, float beta, int niters, int smooth_niters, int patch_size) {
   iftImage  *mask1, *seeds, *label;
   iftMImage *mimg;
@@ -216,23 +157,6 @@ GVector* superPixelSamplingBow(Image* image, BagOfVisualWordsManager* bagOfVisua
     iftImage *ift = imageToIft(image);
     iftImage *superPixels = computeSuperPixels(ift, numberSuperPixels, alpha, beta, numberIterations, numberSmoothIterations, patchSize);
     GVector *samplingVector = iftImageToVector(image, superPixels, numberSuperPixels, patchSize, maxSamples);
-
-    /*iftAdjRel *A = iftCircular(0.0);
-    iftColor rgb;
-    rgb.val[0] = 0;
-    rgb.val[1] = 255;
-    rgb.val[2] = 255;
-    iftColor YCbCr = iftRGBtoYCbCr(rgb, 255);
-    iftImage *border  = iftBorderImage(superPixels);
-    iftDrawBorders(ift,border,A,YCbCr,A);
-    for (int y = 0; y < image->ny; y++) {
-      for (int x = 0; x < image->nx; x++) {
-        imageValCh(image, x, y, 0) = iftGetRGB(ift, y*ift->xsize + x, 256).val[0];
-        imageValCh(image, x, y, 1) = iftGetRGB(ift, y*ift->xsize + x, 256).val[1];
-        imageValCh(image, x, y, 2) = iftGetRGB(ift, y*ift->xsize + x, 256).val[2];
-      }
-    }
-    writeImagePNG(image,"border.png");*/
 
     iftDestroyImage(&ift);
     iftDestroyImage(&superPixels);

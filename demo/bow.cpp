@@ -20,7 +20,7 @@
  * 1 -> k-means
  */
 #define SAMPLER 1
-#define FEATURE_EXTRACTOR 1
+#define FEATURE_EXTRACTOR 0
 #define CLUSTERING 0
 #define CLASSIFIER 0
 
@@ -261,20 +261,6 @@ int main(int argc, char **argv) {
     //do classficiador. Em seguida, o bow manager recebe
     //o ponteiro do classificador. Desta forma o classificador
     //podera ser usado internamente dentro do bow manager.
-
-    //knn
-//    Knn_Classifier* classifierknn = createKnnClassifier();
-//    classifierknn->k = 1;
-//    classifierknn->nlabels = 100;
-//    bowManager->classifier = (void*)classifierknn;
-//    bowManager->fitFunction = knn_Classifier_fit;
-//    bowManager->storeTrainData = false;
-//    bowManager->predictFunction = knn_Classifier_predict;
-//    bowManager->storePredictedData = false;
-//    bowManager->freeFunctionClassifier = destroyKnnClassifierForVoidPointer;
-
-
-    //"kmeans classifier"
     printf("## SELECTED CLASSIFIER: ");
     switch (CLASSIFIER) {
         // SVM.
